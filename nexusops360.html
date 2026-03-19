@@ -1,0 +1,3189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nexusops-360 | Operations Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&family=Exo+2:wght@200;400;600;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-primary: #050b14;
+  --bg-secondary: #0a1628;
+  --bg-card: #0d1f35;
+  --bg-card2: #071525;
+  --accent-blue: #00c8ff;
+  --accent-cyan: #00ffd5;
+  --accent-orange: #ff6b35;
+  --accent-red: #ff3366;
+  --accent-green: #00ff9d;
+  --accent-yellow: #ffd700;
+  --text-primary: #e8f4fd;
+  --text-secondary: #7ab3d4;
+  --text-muted: #3d6480;
+  --border: rgba(0,200,255,0.15);
+  --border-glow: rgba(0,200,255,0.4);
+  --shadow-glow: 0 0 30px rgba(0,200,255,0.1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Exo 2', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animated grid background */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index:0;
+  pointer-events:none;
+}
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen {
+  position:fixed; inset:0; z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(ellipse at center, #0a1628 0%, #050b14 100%);
+}
+.login-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glow);
+  border-radius:16px;
+  padding:48px 40px;
+  width:420px;
+  box-shadow: 0 0 80px rgba(0,200,255,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+  animation: fadeSlideUp 0.6s ease;
+  position:relative;
+  overflow:hidden;
+}
+.login-box::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:3px;
+  background: linear-gradient(90deg, transparent, var(--accent-blue), var(--accent-cyan), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer { 0%{opacity:0.5} 50%{opacity:1} 100%{opacity:0.5} }
+@keyframes fadeSlideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+.login-logo {
+  text-align:center;
+  margin-bottom:32px;
+}
+.login-logo .brand {
+  font-family:'Rajdhani',sans-serif;
+  font-size:32px;
+  font-weight:700;
+  letter-spacing:3px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.login-logo .tagline {
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--text-muted);
+  letter-spacing:2px;
+  margin-top:4px;
+}
+.login-badge {
+  display:inline-block;
+  background: rgba(0,200,255,0.1);
+  border:1px solid rgba(0,200,255,0.3);
+  border-radius:20px;
+  padding:4px 16px;
+  font-size:11px;
+  color:var(--accent-blue);
+  letter-spacing:2px;
+  margin-top:8px;
+  font-family:'JetBrains Mono',monospace;
+}
+.login-time-display {
+  background: rgba(0,255,213,0.05);
+  border:1px solid rgba(0,255,213,0.2);
+  border-radius:8px;
+  padding:12px;
+  text-align:center;
+  margin-bottom:24px;
+  font-family:'JetBrains Mono',monospace;
+}
+.login-time-display .time-val {
+  font-size:24px;
+  color:var(--accent-cyan);
+  font-weight:600;
+}
+.login-time-display .date-val {
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:2px;
+}
+.form-group { margin-bottom:16px; }
+.form-group label {
+  display:block;
+  font-size:11px;
+  color:var(--text-muted);
+  letter-spacing:2px;
+  margin-bottom:8px;
+  font-family:'JetBrains Mono',monospace;
+}
+.form-group input, .form-group select {
+  width:100%;
+  background: rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px 16px;
+  color:var(--text-primary);
+  font-family:'Exo 2',sans-serif;
+  font-size:14px;
+  transition:all 0.3s;
+  outline:none;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color:var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
+  background: rgba(0,200,255,0.04);
+}
+.form-group select option { background:#0d1f35; }
+.btn-login {
+  width:100%;
+  padding:14px;
+  background: linear-gradient(135deg, #0066cc, #00c8ff);
+  border:none;
+  border-radius:8px;
+  color:#fff;
+  font-family:'Rajdhani',sans-serif;
+  font-size:16px;
+  font-weight:700;
+  letter-spacing:3px;
+  cursor:pointer;
+  transition:all 0.3s;
+  margin-top:8px;
+  position:relative;
+  overflow:hidden;
+}
+.btn-login:hover {
+  transform:translateY(-2px);
+  box-shadow:0 8px 25px rgba(0,200,255,0.4);
+}
+.login-error {
+  color:var(--accent-red);
+  font-size:12px;
+  text-align:center;
+  margin-top:12px;
+  display:none;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* ===== MAIN LAYOUT ===== */
+#mainApp { display:none; position:relative; z-index:1; }
+
+/* TOP NAV */
+.topnav {
+  position:fixed; top:0; left:0; right:0;
+  height:60px;
+  background: rgba(5,11,20,0.95);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px;
+  z-index:500;
+  box-shadow: 0 1px 0 var(--border-glow);
+}
+.nav-brand {
+  font-family:'Rajdhani',sans-serif;
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:3px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.nav-center {
+  display:flex; align-items:center; gap:8px;
+}
+.nav-badge {
+  background: rgba(0,200,255,0.1);
+  border:1px solid rgba(0,200,255,0.25);
+  border-radius:4px;
+  padding:4px 12px;
+  font-size:11px;
+  color:var(--accent-blue);
+  font-family:'JetBrains Mono',monospace;
+  letter-spacing:1px;
+}
+.nav-right {
+  display:flex; align-items:center; gap:16px;
+}
+.nav-user {
+  display:flex; align-items:center; gap:10px;
+}
+.user-avatar {
+  width:34px; height:34px;
+  border-radius:50%;
+  background: linear-gradient(135deg, #0066cc, #00c8ff);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:13px;
+  border:2px solid rgba(0,200,255,0.3);
+}
+.user-info { text-align:right; }
+.user-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+.user-role { font-size:10px; color:var(--accent-blue); font-family:'JetBrains Mono',monospace; }
+.session-timer {
+  background: rgba(0,255,157,0.08);
+  border:1px solid rgba(0,255,157,0.25);
+  border-radius:6px;
+  padding:6px 12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  color:var(--accent-green);
+  display:flex; align-items:center; gap:6px;
+}
+.session-dot {
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--accent-green);
+  animation: pulse-dot 1.5s infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+.btn-logout {
+  background: rgba(255,51,102,0.12);
+  border:1px solid rgba(255,51,102,0.3);
+  border-radius:6px;
+  padding:8px 16px;
+  color:var(--accent-red);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-logout:hover {
+  background: rgba(255,51,102,0.25);
+  box-shadow:0 0 15px rgba(255,51,102,0.2);
+}
+
+/* ===== HOME MENU ===== */
+#homeMenu {
+  padding-top:80px;
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.home-header {
+  text-align:center;
+  margin-bottom:48px;
+}
+.home-title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:48px;
+  font-weight:700;
+  letter-spacing:6px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  line-height:1.1;
+}
+.home-subtitle {
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  color:var(--text-muted);
+  letter-spacing:3px;
+  margin-top:8px;
+}
+.welcome-msg {
+  font-size:16px;
+  color:var(--text-secondary);
+  margin-top:12px;
+}
+.features-grid {
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:16px;
+  max-width:1200px;
+  width:90%;
+  padding:0 20px;
+}
+.feature-card {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:28px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.3s;
+  position:relative;
+  overflow:hidden;
+  animation: fadeSlideUp 0.5s ease both;
+}
+.feature-card:hover {
+  border-color:var(--border-glow);
+  transform:translateY(-6px);
+  box-shadow: 0 20px 50px rgba(0,200,255,0.15);
+}
+.feature-card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:2px;
+  background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.feature-card:hover::before { opacity:1; }
+.feature-card.dev-mode {
+  opacity:0.5;
+  cursor:not-allowed;
+}
+.feature-card.dev-mode:hover {
+  transform:none;
+  box-shadow:none;
+}
+.feature-icon {
+  font-size:36px;
+  margin-bottom:14px;
+  display:block;
+}
+.feature-label {
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:1px;
+  color:var(--text-primary);
+}
+.feature-desc {
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:6px;
+  line-height:1.5;
+}
+.dev-badge {
+  display:inline-block;
+  background: rgba(255,107,53,0.15);
+  border:1px solid rgba(255,107,53,0.3);
+  border-radius:4px;
+  padding:2px 8px;
+  font-size:9px;
+  color:var(--accent-orange);
+  font-family:'JetBrains Mono',monospace;
+  margin-top:8px;
+  letter-spacing:1px;
+}
+
+/* ===== SECTION WRAPPER ===== */
+.section-wrapper {
+  display:none;
+  padding-top:70px;
+  min-height:100vh;
+}
+.section-wrapper.active { display:block; }
+
+.section-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 28px;
+  border-bottom:1px solid var(--border);
+  background: rgba(10,22,40,0.8);
+  backdrop-filter:blur(10px);
+  position:sticky;
+  top:60px;
+  z-index:100;
+}
+.section-title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:var(--text-primary);
+  display:flex; align-items:center; gap:10px;
+}
+.breadcrumb {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--text-muted);
+  display:flex; align-items:center; gap:6px;
+}
+.breadcrumb span { color:var(--accent-blue); }
+.btn-back {
+  background: rgba(0,200,255,0.08);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:8px 16px;
+  color:var(--accent-blue);
+  cursor:pointer;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1px;
+  transition:all 0.2s;
+  display:flex; align-items:center; gap:6px;
+}
+.btn-back:hover {
+  background: rgba(0,200,255,0.15);
+  border-color:var(--accent-blue);
+}
+
+.section-body { padding:24px 28px; }
+
+/* ===== STATS ROW ===== */
+.stats-row {
+  display:grid;
+  gap:16px;
+  margin-bottom:24px;
+}
+.stats-row.cols-5 { grid-template-columns: repeat(5,1fr); }
+.stats-row.cols-4 { grid-template-columns: repeat(4,1fr); }
+.stats-row.cols-3 { grid-template-columns: repeat(3,1fr); }
+
+.stat-card {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+  transition:all 0.3s;
+}
+.stat-card:hover { border-color:var(--border-glow); }
+.stat-card::after {
+  content:'';
+  position:absolute;
+  bottom:0; left:0; right:0;
+  height:2px;
+  background: var(--stat-color, var(--accent-blue));
+  opacity:0.6;
+}
+.stat-label {
+  font-size:10px;
+  color:var(--text-muted);
+  letter-spacing:2px;
+  font-family:'JetBrains Mono',monospace;
+  margin-bottom:8px;
+}
+.stat-value {
+  font-family:'Rajdhani',sans-serif;
+  font-size:32px;
+  font-weight:700;
+  color: var(--stat-color, var(--accent-blue));
+  line-height:1;
+}
+.stat-sub {
+  font-size:11px;
+  color:var(--text-muted);
+  margin-top:4px;
+}
+.stat-trend {
+  position:absolute;
+  top:16px; right:16px;
+  font-size:11px;
+  font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+}
+.trend-up { color:var(--accent-green); }
+.trend-down { color:var(--accent-red); }
+
+/* ===== FILTERS ROW ===== */
+.filters-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  margin-bottom:20px;
+  padding:16px;
+  background: var(--bg-card2);
+  border:1px solid var(--border);
+  border-radius:10px;
+}
+.filter-group {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.filter-label {
+  font-size:9px;
+  color:var(--text-muted);
+  letter-spacing:2px;
+  font-family:'JetBrains Mono',monospace;
+}
+.filter-select, .filter-input {
+  background: rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:8px 12px;
+  color:var(--text-primary);
+  font-family:'Exo 2',sans-serif;
+  font-size:13px;
+  outline:none;
+  min-width:140px;
+  transition:all 0.2s;
+  cursor:pointer;
+}
+.filter-select:focus, .filter-input:focus {
+  border-color:var(--accent-blue);
+  box-shadow:0 0 0 2px rgba(0,200,255,0.1);
+}
+.filter-select option { background:#0d1f35; }
+.btn-filter {
+  background: linear-gradient(135deg, #004c99, #0077cc);
+  border:none;
+  border-radius:6px;
+  padding:9px 20px;
+  color:#fff;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:2px;
+  cursor:pointer;
+  transition:all 0.2s;
+  align-self:flex-end;
+}
+.btn-filter:hover {
+  box-shadow:0 4px 15px rgba(0,120,204,0.4);
+  transform:translateY(-1px);
+}
+.btn-download {
+  background: rgba(0,255,157,0.08);
+  border:1px solid rgba(0,255,157,0.25);
+  border-radius:6px;
+  padding:9px 20px;
+  color:var(--accent-green);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:2px;
+  cursor:pointer;
+  transition:all 0.2s;
+  align-self:flex-end;
+}
+.btn-download:hover {
+  background: rgba(0,255,157,0.15);
+  box-shadow:0 4px 15px rgba(0,255,157,0.2);
+}
+
+/* ===== TABLES ===== */
+.table-wrap {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:24px;
+}
+.table-head-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+}
+.table-title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:16px;
+  font-weight:600;
+  letter-spacing:1px;
+  color:var(--text-primary);
+  display:flex; align-items:center; gap:8px;
+}
+.table-count {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--text-muted);
+}
+.data-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.data-table thead tr {
+  background: rgba(0,200,255,0.05);
+}
+.data-table thead th {
+  padding:12px 16px;
+  text-align:left;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--text-muted);
+  letter-spacing:1.5px;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.data-table tbody tr {
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  transition:background 0.2s;
+}
+.data-table tbody tr:hover {
+  background: rgba(0,200,255,0.03);
+}
+.data-table tbody td {
+  padding:10px 16px;
+  color:var(--text-secondary);
+  white-space:nowrap;
+}
+.data-table tbody td:first-child { color:var(--text-primary); }
+.badge {
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:20px;
+  font-size:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-weight:600;
+}
+.badge-red { background:rgba(255,51,102,0.12); color:var(--accent-red); border:1px solid rgba(255,51,102,0.25); }
+.badge-green { background:rgba(0,255,157,0.1); color:var(--accent-green); border:1px solid rgba(0,255,157,0.25); }
+.badge-yellow { background:rgba(255,215,0,0.1); color:var(--accent-yellow); border:1px solid rgba(255,215,0,0.25); }
+.badge-blue { background:rgba(0,200,255,0.1); color:var(--accent-blue); border:1px solid rgba(0,200,255,0.25); }
+.badge-orange { background:rgba(255,107,53,0.1); color:var(--accent-orange); border:1px solid rgba(255,107,53,0.25); }
+
+/* ===== CHARTS GRID ===== */
+.charts-grid {
+  display:grid;
+  gap:20px;
+  margin-bottom:24px;
+}
+.charts-grid.cols-2 { grid-template-columns:1fr 1fr; }
+.charts-grid.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+.chart-card {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+}
+.chart-card-title {
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  font-weight:600;
+  color:var(--text-primary);
+  margin-bottom:16px;
+  letter-spacing:1px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.chart-canvas-wrap { position:relative; height:240px; }
+
+/* ===== TABS ===== */
+.tab-nav {
+  display:flex;
+  gap:4px;
+  background: var(--bg-card2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:6px;
+  margin-bottom:20px;
+  overflow-x:auto;
+}
+.tab-btn {
+  flex-shrink:0;
+  padding:9px 20px;
+  background:transparent;
+  border:none;
+  border-radius:7px;
+  color:var(--text-muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1px;
+  cursor:pointer;
+  transition:all 0.2s;
+  white-space:nowrap;
+}
+.tab-btn.active {
+  background: rgba(0,200,255,0.12);
+  color:var(--accent-blue);
+  border:1px solid rgba(0,200,255,0.25);
+}
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ===== GITHUB STATUS BAR ===== */
+.github-bar {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background: rgba(0,200,255,0.04);
+  border:1px solid rgba(0,200,255,0.12);
+  border-radius:8px;
+  padding:10px 16px;
+  margin-bottom:20px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+}
+.github-status-dot {
+  width:8px; height:8px;
+  border-radius:50%;
+  background:var(--accent-green);
+  animation: pulse-dot 2s infinite;
+  flex-shrink:0;
+}
+.github-status-dot.loading { background:var(--accent-yellow); }
+.github-status-dot.error { background:var(--accent-red); animation:none; }
+.github-info { color:var(--text-muted); flex:1; }
+.github-info b { color:var(--accent-cyan); }
+.github-repo-input {
+  background: rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:6px 10px;
+  color:var(--text-primary);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  width:300px;
+  outline:none;
+}
+.btn-connect-gh {
+  background: rgba(0,200,255,0.12);
+  border:1px solid rgba(0,200,255,0.3);
+  border-radius:5px;
+  padding:6px 14px;
+  color:var(--accent-blue);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-connect-gh:hover { background:rgba(0,200,255,0.2); }
+
+/* ===== LOSS DASHBOARD ===== */
+.loss-heat {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap:8px;
+  margin-bottom:20px;
+}
+.heat-cell {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.heat-cell:hover { transform:scale(1.04); }
+.heat-cell .loc-name {
+  font-size:10px;
+  color:var(--text-muted);
+  font-family:'JetBrains Mono',monospace;
+  letter-spacing:1px;
+  margin-bottom:4px;
+}
+.heat-cell .loc-pct {
+  font-family:'Rajdhani',sans-serif;
+  font-size:20px;
+  font-weight:700;
+}
+.heat-high { border-color:rgba(255,51,102,0.4); }
+.heat-high .loc-pct { color:var(--accent-red); }
+.heat-mid { border-color:rgba(255,215,0,0.4); }
+.heat-mid .loc-pct { color:var(--accent-yellow); }
+.heat-low { border-color:rgba(0,255,157,0.4); }
+.heat-low .loc-pct { color:var(--accent-green); }
+
+/* ===== CALLOUT SECTION ===== */
+.callout-form {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:20px;
+}
+.callout-form-grid {
+  display:grid;
+  grid-template-columns: repeat(4,1fr);
+  gap:12px;
+  margin-bottom:12px;
+}
+.callout-textarea {
+  width:100%;
+  background: rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:10px 14px;
+  color:var(--text-primary);
+  font-family:'Exo 2',sans-serif;
+  font-size:13px;
+  outline:none;
+  resize:vertical;
+  min-height:80px;
+  transition:all 0.2s;
+}
+.callout-textarea:focus {
+  border-color:var(--accent-blue);
+  box-shadow:0 0 0 2px rgba(0,200,255,0.1);
+}
+.btn-submit {
+  background: linear-gradient(135deg, #006633, #00cc66);
+  border:none;
+  border-radius:6px;
+  padding:10px 24px;
+  color:#fff;
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:2px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-submit:hover {
+  box-shadow:0 4px 15px rgba(0,204,102,0.4);
+  transform:translateY(-1px);
+}
+
+/* ===== COMPLIANCE ===== */
+.compliance-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.rca-form {
+  background: rgba(255,107,53,0.05);
+  border:1px solid rgba(255,107,53,0.2);
+  border-radius:8px;
+  padding:14px;
+  margin-top:8px;
+}
+.rca-form textarea {
+  width:100%;
+  background: rgba(255,255,255,0.04);
+  border:1px solid rgba(255,107,53,0.3);
+  border-radius:5px;
+  padding:8px;
+  color:var(--text-primary);
+  font-family:'Exo 2',sans-serif;
+  font-size:12px;
+  outline:none;
+  resize:vertical;
+  min-height:60px;
+}
+.progress-bar-wrap {
+  background: rgba(255,255,255,0.06);
+  border-radius:4px;
+  height:8px;
+  overflow:hidden;
+  margin-top:4px;
+}
+.progress-bar {
+  height:100%;
+  border-radius:4px;
+  transition:width 0.8s ease;
+}
+
+/* ===== TASK MGMT ===== */
+.task-inbox {
+  display:flex;
+  gap:16px;
+}
+.task-col {
+  flex:1;
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px;
+  min-height:400px;
+}
+.task-col-header {
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:1px;
+  margin-bottom:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.task-card {
+  background: rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px;
+  margin-bottom:10px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.task-card:hover {
+  border-color:var(--border-glow);
+  transform:translateX(3px);
+}
+.task-card-title {
+  font-size:13px;
+  color:var(--text-primary);
+  font-weight:600;
+  margin-bottom:6px;
+}
+.task-card-meta {
+  font-size:10px;
+  color:var(--text-muted);
+  font-family:'JetBrains Mono',monospace;
+}
+.task-timer-display {
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--accent-cyan);
+  padding:4px 8px;
+  background: rgba(0,200,255,0.07);
+  border-radius:4px;
+  margin-top:6px;
+  display:inline-block;
+}
+
+/* ===== KRA ===== */
+.kra-score-cell {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.kra-score-input {
+  background: rgba(255,255,255,0.06);
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:4px 8px;
+  color:var(--accent-cyan);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  width:60px;
+  text-align:center;
+  outline:none;
+}
+.kra-score-input:focus {
+  border-color:var(--accent-blue);
+}
+.btn-save-kra {
+  background: rgba(0,255,213,0.1);
+  border:1px solid rgba(0,255,213,0.3);
+  border-radius:4px;
+  padding:4px 10px;
+  color:var(--accent-cyan);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-save-kra:hover { background:rgba(0,255,213,0.2); }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px) {
+  .features-grid { grid-template-columns:repeat(2,1fr); }
+  .stats-row.cols-5 { grid-template-columns:repeat(2,1fr); }
+  .charts-grid.cols-2 { grid-template-columns:1fr; }
+  .task-inbox { flex-direction:column; }
+}
+
+/* ===== MISC UTILS ===== */
+.flex { display:flex; }
+.flex-center { display:flex; align-items:center; justify-content:center; }
+.gap-12 { gap:12px; }
+.mt-16 { margin-top:16px; }
+.mb-16 { margin-bottom:16px; }
+.text-center { text-align:center; }
+.empty-state {
+  text-align:center;
+  padding:60px 20px;
+  color:var(--text-muted);
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+}
+.empty-state .empty-icon { font-size:48px; margin-bottom:16px; opacity:0.4; }
+.loading-spinner {
+  display:inline-block;
+  width:20px; height:20px;
+  border:2px solid var(--border);
+  border-top-color:var(--accent-blue);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+.notification {
+  position:fixed;
+  bottom:24px; right:24px;
+  background: var(--bg-card);
+  border:1px solid var(--border-glow);
+  border-radius:10px;
+  padding:14px 20px;
+  z-index:9999;
+  font-size:13px;
+  max-width:300px;
+  box-shadow: var(--shadow-glow);
+  animation: slideInRight 0.3s ease;
+  display:none;
+}
+@keyframes slideInRight { from{transform:translateX(100px);opacity:0} to{transform:translateX(0);opacity:1} }
+.notification.show { display:flex; align-items:center; gap:10px; }
+
+/* Feature card delay animations */
+.feature-card:nth-child(1){animation-delay:0.05s}
+.feature-card:nth-child(2){animation-delay:0.1s}
+.feature-card:nth-child(3){animation-delay:0.15s}
+.feature-card:nth-child(4){animation-delay:0.2s}
+.feature-card:nth-child(5){animation-delay:0.25s}
+.feature-card:nth-child(6){animation-delay:0.3s}
+.feature-card:nth-child(7){animation-delay:0.35s}
+.feature-card:nth-child(8){animation-delay:0.4s}
+.feature-card:nth-child(9){animation-delay:0.45s}
+.feature-card:nth-child(10){animation-delay:0.5s}
+.feature-card:nth-child(11){animation-delay:0.55s}
+</style>
+</head>
+<body>
+
+<!-- ============================= LOGIN SCREEN ============================= -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="brand">NEXUSOPS-360</div>
+      <div class="tagline">OPERATIONS INTELLIGENCE PLATFORM</div>
+      <div class="login-badge">⚡ SECURE ACCESS PORTAL</div>
+    </div>
+    <div class="login-time-display">
+      <div class="time-val" id="loginClock">--:--:--</div>
+      <div class="date-val" id="loginDate">Loading...</div>
+    </div>
+    <div class="form-group">
+      <label>EMAIL ADDRESS</label>
+      <input type="email" id="loginEmail" placeholder="your.name@meesho.com" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label>PASSWORD</label>
+      <input type="password" id="loginPassword" placeholder="••••••••"/>
+    </div>
+    <div class="form-group">
+      <label>DESIGNATION</label>
+      <select id="loginDesig">
+        <option value="">Select Designation</option>
+        <option value="superadmin">Super Admin</option>
+        <option value="regional_head">Regional Head</option>
+        <option value="cluster_head">Cluster Head</option>
+        <option value="area_manager">Area Manager</option>
+        <option value="operations">Operations</option>
+      </select>
+    </div>
+    <button class="btn-login" onclick="doLogin()">⚡ AUTHENTICATE &amp; ENTER</button>
+    <div class="login-error" id="loginError">⛔ Invalid credentials. Please try again.</div>
+  </div>
+</div>
+
+<!-- ============================= MAIN APP ============================= -->
+<div id="mainApp">
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <div class="nav-brand">NEXUSOPS-360</div>
+    <div class="nav-center">
+      <div class="nav-badge">LIVE</div>
+      <div class="nav-badge" id="navDate">--</div>
+    </div>
+    <div class="nav-right">
+      <div class="session-timer">
+        <div class="session-dot"></div>
+        SESSION: <span id="sessionTimer">00:00:00</span>
+      </div>
+      <div class="nav-user">
+        <div class="user-info">
+          <div class="user-name" id="navUserName">--</div>
+          <div class="user-role" id="navUserRole">--</div>
+        </div>
+        <div class="user-avatar" id="navUserAvatar">U</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">⏻ LOG-OFF</button>
+    </div>
+  </nav>
+
+  <!-- HOME MENU -->
+  <div id="homeMenu">
+    <div class="home-header">
+      <div class="home-title">NEXUSOPS-360</div>
+      <div class="home-subtitle">OPERATIONS INTELLIGENCE PLATFORM · SELECT MODULE</div>
+      <div class="welcome-msg">Welcome back, <span id="homeWelcomeName" style="color:var(--accent-cyan)">User</span> · Choose a module below</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card" onclick="openSection('empMgmt')">
+        <span class="feature-icon">👥</span>
+        <div class="feature-label">A. Employee Management</div>
+        <div class="feature-desc">Daily task tracking, inbox & time recording</div>
+      </div>
+      <div class="feature-card" onclick="openSection('kraDash')">
+        <span class="feature-icon">🎯</span>
+        <div class="feature-label">B. Operation - KRA</div>
+        <div class="feature-desc">KRA scoring & performance ratings</div>
+      </div>
+      <div class="feature-card" onclick="openSection('lossDash')">
+        <span class="feature-icon">📉</span>
+        <div class="feature-label">C. Loss Dashboard</div>
+        <div class="feature-desc">LossIQ v10 · Multi-filter loss analytics</div>
+      </div>
+      <div class="feature-card dev-mode" onclick="showDevModal('D. Escalation Matrix')">
+        <span class="feature-icon">📋</span>
+        <div class="feature-label">D. Escalation Matrix</div>
+        <div class="feature-desc">Issue escalation & SLA tracking</div>
+        <div class="dev-badge">UNDER DEVELOPMENT</div>
+      </div>
+      <div class="feature-card dev-mode" onclick="showDevModal('E. Node Level Compliance')">
+        <span class="feature-icon">🔗</span>
+        <div class="feature-label">E. Node Level Compliance</div>
+        <div class="feature-desc">Node-wise compliance monitoring</div>
+        <div class="dev-badge">UNDER DEVELOPMENT</div>
+      </div>
+      <div class="feature-card dev-mode" onclick="showDevModal('F. Pendency Trend')">
+        <span class="feature-icon">📈</span>
+        <div class="feature-label">F. Pendency Trend</div>
+        <div class="feature-desc">Pendency analysis & trend graphs</div>
+        <div class="dev-badge">UNDER DEVELOPMENT</div>
+      </div>
+      <div class="feature-card dev-mode" onclick="showDevModal('G. NLH Fleet')">
+        <span class="feature-icon">🚚</span>
+        <div class="feature-label">G. NLH Fleet</div>
+        <div class="feature-desc">Fleet management & tracking</div>
+        <div class="dev-badge">UNDER DEVELOPMENT</div>
+      </div>
+      <div class="feature-card dev-mode" onclick="showDevModal('H. RLH')">
+        <span class="feature-icon">🏭</span>
+        <div class="feature-label">H. RLH</div>
+        <div class="feature-desc">Regional last-mile hub operations</div>
+        <div class="dev-badge">UNDER DEVELOPMENT</div>
+      </div>
+      <div class="feature-card dev-mode" onclick="showDevModal('I. DOH Sheet')">
+        <span class="feature-icon">📄</span>
+        <div class="feature-label">I. DOH Sheet</div>
+        <div class="feature-desc">Daily operations handover sheet</div>
+        <div class="dev-badge">UNDER DEVELOPMENT</div>
+      </div>
+      <div class="feature-card" onclick="openSection('sortCode')">
+        <span class="feature-icon">🔢</span>
+        <div class="feature-label">J. Sort Code</div>
+        <div class="feature-desc">Sort centre code lookup & management</div>
+      </div>
+      <div class="feature-card" onclick="openSection('callouts')">
+        <span class="feature-icon">📞</span>
+        <div class="feature-label">K. Daily Call Outs</div>
+        <div class="feature-desc">Meeting notes & daily callout tracker</div>
+      </div>
+      <div class="feature-card" onclick="openSection('compliance')">
+        <span class="feature-icon">✅</span>
+        <div class="feature-label">L. Compliance</div>
+        <div class="feature-desc">D0+ connection & bagging compliance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== A: EMPLOYEE MANAGEMENT ======== -->
+  <div id="empMgmt" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> Employee Management</div>
+        <div class="section-title">👥 Employee Management · Task Inbox</div>
+      </div>
+      <div class="flex gap-12">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent-cyan);padding:8px 14px;background:rgba(0,255,213,0.06);border:1px solid rgba(0,255,213,0.2);border-radius:6px;">
+          Login time recorded: <span id="empLoginTime">--:--:--</span>
+        </div>
+        <button class="btn-back" onclick="goHome()">← HOME</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="github-bar">
+        <div class="github-status-dot" id="empGhDot"></div>
+        <div class="github-info">GitHub: <b id="empGhRepo">Not connected</b> · Employee data synced from repo</div>
+        <input class="github-repo-input" id="empGhInput" placeholder="owner/repo (e.g. Karthik221188/Nexusops-360)" value="Karthik221188/Nexusops-360"/>
+        <button class="btn-connect-gh" onclick="connectGithub('emp')">CONNECT</button>
+      </div>
+
+      <div class="stats-row cols-4">
+        <div class="stat-card" style="--stat-color:var(--accent-blue)">
+          <div class="stat-label">ACTIVE EMPLOYEES</div>
+          <div class="stat-value" id="empTotal">24</div>
+          <div class="stat-sub">Logged in today</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-green)">
+          <div class="stat-label">TASKS COMPLETED</div>
+          <div class="stat-value" id="empCompleted">18</div>
+          <div class="stat-sub">Today</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-yellow)">
+          <div class="stat-label">IN PROGRESS</div>
+          <div class="stat-value" id="empInProgress">5</div>
+          <div class="stat-sub">Active tasks</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-red)">
+          <div class="stat-label">OVERDUE</div>
+          <div class="stat-value" id="empOverdue">1</div>
+          <div class="stat-sub">Needs attention</div>
+        </div>
+      </div>
+
+      <div class="task-inbox" id="taskInbox">
+        <div class="task-col">
+          <div class="task-col-header">
+            📥 INBOX
+            <span class="badge badge-blue">4</span>
+          </div>
+          <div id="taskInboxList">
+            <div class="task-card" onclick="moveTask(this,'inprogress')">
+              <div class="task-card-title">Morning Hub Audit — CTS</div>
+              <div class="task-card-meta">Priority: HIGH · Due: Today 10:00</div>
+              <div class="task-timer-display">⏱ Click to start</div>
+            </div>
+            <div class="task-card" onclick="moveTask(this,'inprogress')">
+              <div class="task-card-title">Scan Compliance Report</div>
+              <div class="task-card-meta">Priority: MED · Due: Today 12:00</div>
+              <div class="task-timer-display">⏱ Click to start</div>
+            </div>
+            <div class="task-card" onclick="moveTask(this,'inprogress')">
+              <div class="task-card-title">Daily Callout Meeting Notes</div>
+              <div class="task-card-meta">Priority: LOW · Due: Today 15:00</div>
+              <div class="task-timer-display">⏱ Click to start</div>
+            </div>
+            <div class="task-card" onclick="moveTask(this,'inprogress')">
+              <div class="task-card-title">Loss Data Verification — BLRS</div>
+              <div class="task-card-meta">Priority: HIGH · Due: Today 17:00</div>
+              <div class="task-timer-display">⏱ Click to start</div>
+            </div>
+          </div>
+        </div>
+        <div class="task-col">
+          <div class="task-col-header">
+            🔄 IN PROGRESS
+            <span class="badge badge-yellow">0</span>
+          </div>
+          <div id="taskInProgressList">
+            <div class="empty-state" style="padding:30px 10px;">
+              <div>Click an INBOX task<br>to start working</div>
+            </div>
+          </div>
+        </div>
+        <div class="task-col">
+          <div class="task-col-header">
+            ✅ COMPLETED
+            <span class="badge badge-green">0</span>
+          </div>
+          <div id="taskDoneList">
+            <div class="empty-state" style="padding:30px 10px;">
+              <div>Completed tasks<br>appear here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employee Table -->
+      <div class="table-wrap mt-16">
+        <div class="table-head-row">
+          <div class="table-title">🧑‍💼 Employee Register <span class="table-count" id="empTableCount">(loading...)</span></div>
+          <button class="btn-download" onclick="downloadCSV('empTable','employees.csv')">⬇ EXPORT CSV</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="empTable">
+            <thead><tr>
+              <th>#</th><th>NAME</th><th>DESIGNATION</th><th>ZONE</th>
+              <th>LOGIN TIME</th><th>STATUS</th><th>TASKS</th><th>TASK TIME</th>
+            </tr></thead>
+            <tbody id="empTableBody">
+              <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">Connect GitHub to load employee data</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== B: KRA DASHBOARD ======== -->
+  <div id="kraDash" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> KRA Dashboard</div>
+        <div class="section-title">🎯 Operation · KRA Scoring</div>
+      </div>
+      <button class="btn-back" onclick="goHome()">← HOME</button>
+    </div>
+    <div class="section-body">
+      <div class="github-bar">
+        <div class="github-status-dot" id="kraGhDot"></div>
+        <div class="github-info">GitHub: <b id="kraGhRepo">Not connected</b> · File: <b>Nexusops-360 - kra.xlsx</b></div>
+        <input class="github-repo-input" id="kraGhInput" placeholder="Karthik221188/Nexusops-360" value="Karthik221188/Nexusops-360"/>
+        <button class="btn-connect-gh" onclick="loadKRAData()">LOAD KRA DATA</button>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('kra','kraMyPerf')">📊 MY PERFORMANCE</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraScore')">✏️ SCORE KRA</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraCluster')">🏢 CLUSTER SCORES</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraAM')">👤 AREA MANAGER SCORES</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraSuperAdmin')">⚙️ SUPER ADMIN</button>
+      </div>
+
+      <!-- My Performance Tab -->
+      <div class="tab-content active" id="kraMyPerf">
+        <div class="filters-row">
+          <div class="filter-group">
+            <div class="filter-label">YEAR</div>
+            <select class="filter-select" id="kraYear" onchange="renderKRAMyPerf()">
+              <option>2025</option><option>2024</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">MONTH</div>
+            <select class="filter-select" id="kraMonth" onchange="renderKRAMyPerf()">
+              <option value="">All Months</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">WEEK</div>
+            <select class="filter-select" id="kraWeek" onchange="renderKRAMyPerf()">
+              <option value="">All Weeks</option>
+              <script>for(let i=1;i<=52;i++)document.write(`<option>Week ${i}</option>`);</script>
+            </select>
+          </div>
+        </div>
+        <div class="stats-row cols-4">
+          <div class="stat-card" style="--stat-color:var(--accent-cyan)">
+            <div class="stat-label">OVERALL SCORE</div>
+            <div class="stat-value" id="kraMyOverall">-</div>
+            <div class="stat-sub">Out of 100</div>
+          </div>
+          <div class="stat-card" style="--stat-color:var(--accent-green)">
+            <div class="stat-label">KRA COMPLETED</div>
+            <div class="stat-value" id="kraMyComplete">-</div>
+            <div class="stat-sub">Criteria</div>
+          </div>
+          <div class="stat-card" style="--stat-color:var(--accent-yellow)">
+            <div class="stat-label">WEIGHTAGE USED</div>
+            <div class="stat-value" id="kraMyWeightage">-</div>
+            <div class="stat-sub">Total %</div>
+          </div>
+          <div class="stat-card" style="--stat-color:var(--accent-orange)">
+            <div class="stat-label">RANK</div>
+            <div class="stat-value" id="kraMyRank">#-</div>
+            <div class="stat-sub">In your cluster</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row">
+            <div class="table-title">📋 My KRA Details</div>
+            <button class="btn-download" onclick="downloadCSV('kraMyTable','my_kra.csv')">⬇ EXPORT</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="kraMyTable">
+              <thead><tr><th>#</th><th>CATEGORY</th><th>KEY RESPONSIBILITY</th><th>DESCRIPTION</th><th>FREQUENCY</th><th>WEIGHTAGE</th><th>METRICS</th><th>MY SCORE</th></tr></thead>
+              <tbody id="kraMyTableBody">
+                <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">Load KRA data from GitHub</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score KRA Tab -->
+      <div class="tab-content" id="kraScore">
+        <div class="filters-row">
+          <div class="filter-group">
+            <div class="filter-label">SELECT MONTH</div>
+            <select class="filter-select" id="kraScoreMonth">
+              <option value="">Select Month</option>
+              <option>January</option><option>February</option><option>March</option>
+              <option>April</option><option>May</option><option>June</option>
+              <option>July</option><option>August</option><option>September</option>
+              <option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">SELECT WEEK</div>
+            <select class="filter-select" id="kraScoreWeek">
+              <option value="">Select Week</option>
+              <script>for(let i=1;i<=52;i++)document.write(`<option>Week ${i}</option>`);</script>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">CLUSTER HEAD / AM NAME</div>
+            <select class="filter-select" id="kraScorePerson">
+              <option value="">Select Person</option>
+            </select>
+          </div>
+          <button class="btn-filter" onclick="loadKRAScoreSheet()">LOAD KRA</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row">
+            <div class="table-title">✏️ Score KRA</div>
+            <button class="btn-submit" onclick="saveAllKRAScores()">💾 SAVE ALL SCORES</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="kraScoreTable">
+              <thead><tr><th>#</th><th>CATEGORY</th><th>KEY RESPONSIBILITY</th><th>FREQUENCY</th><th>WEIGHTAGE</th><th>METRICS</th><th>SCORE</th><th>ACTION</th></tr></thead>
+              <tbody id="kraScoreBody">
+                <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">Select person & period to load KRA</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cluster Scores Tab -->
+      <div class="tab-content" id="kraCluster">
+        <div class="filters-row">
+          <div class="filter-group">
+            <div class="filter-label">ZONE</div>
+            <select class="filter-select" id="kraClusterZone"><option value="">All Zones</option></select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">CLUSTER HEAD</div>
+            <select class="filter-select" id="kraClusterName"><option value="">All CHs</option></select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">MONTH</div>
+            <select class="filter-select"><option>March 2025</option><option>Feb 2025</option></select>
+          </div>
+          <button class="btn-filter" onclick="renderClusterScores()">FILTER</button>
+          <button class="btn-download" onclick="downloadCSV('kraClusterTable','cluster_scores.csv')">⬇ EXPORT</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">🏢 Cluster Head KRA Scores</div></div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="kraClusterTable">
+              <thead><tr><th>#</th><th>CLUSTER HEAD</th><th>ZONE</th><th>RH</th><th>KRA SCORE</th><th>WEIGHTAGE</th><th>MONTH</th><th>STATUS</th></tr></thead>
+              <tbody id="kraClusterBody">
+                <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">Load KRA data first</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Area Manager Scores -->
+      <div class="tab-content" id="kraAM">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">CLUSTER HEAD</div>
+            <select class="filter-select" id="kraAMCluster"><option value="">Select CH</option></select></div>
+          <div class="filter-group"><div class="filter-label">AREA MANAGER</div>
+            <select class="filter-select" id="kraAMName"><option value="">All AMs</option></select></div>
+          <div class="filter-group"><div class="filter-label">MONTH</div>
+            <select class="filter-select"><option>March 2025</option></select></div>
+          <button class="btn-filter" onclick="renderAMScores()">FILTER</button>
+          <button class="btn-download" onclick="downloadCSV('kraAMTable','am_scores.csv')">⬇ EXPORT</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">👤 Area Manager KRA Scores</div></div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="kraAMTable">
+              <thead><tr><th>#</th><th>AREA MANAGER</th><th>CLUSTER HEAD</th><th>ZONE</th><th>KRA SCORE</th><th>WEIGHTAGE</th><th>STATUS</th></tr></thead>
+              <tbody id="kraAMBody">
+                <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">Select Cluster Head to view AM scores</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Super Admin Tab -->
+      <div class="tab-content" id="kraSuperAdmin">
+        <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:20px;margin-bottom:20px;">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--accent-yellow);margin-bottom:12px;">⚙️ SUPER ADMIN · Mapping Configuration</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
+            Map Regional Heads → Cluster Heads → Area Managers. Only accessible to Super Admin & Regional Managers.
+            Mapping determines who can score whom. Upload KRA Excel with Sheet3 to auto-populate login credentials.
+          </p>
+        </div>
+        <div class="charts-grid cols-2">
+          <div class="table-wrap">
+            <div class="table-head-row"><div class="table-title">🔗 RH → CH Mapping</div>
+              <button class="btn-submit" style="padding:6px 14px;font-size:12px;" onclick="saveMapping()">SAVE MAPPING</button></div>
+            <div style="overflow-x:auto">
+              <table class="data-table" id="mappingRHCH">
+                <thead><tr><th>REGIONAL HEAD</th><th>CLUSTER HEAD</th><th>ZONE</th><th>STATUS</th></tr></thead>
+                <tbody id="mappingRHCHBody">
+                  <tr><td colspan="4" class="text-center" style="padding:20px;color:var(--text-muted);">Load KRA Sheet3 from GitHub</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <div class="table-head-row"><div class="table-title">🔗 CH → AM Mapping</div></div>
+            <div style="overflow-x:auto">
+              <table class="data-table" id="mappingCHAM">
+                <thead><tr><th>CLUSTER HEAD</th><th>AREA MANAGER 1</th><th>AM 2</th><th>AM 3</th></tr></thead>
+                <tbody id="mappingCHAMBody">
+                  <tr><td colspan="4" class="text-center" style="padding:20px;color:var(--text-muted);">Load KRA Sheet3 from GitHub</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== C: LOSS DASHBOARD (LossIQ v10) ======== -->
+  <div id="lossDash" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> Loss Dashboard</div>
+        <div class="section-title">📉 LossIQ v10 · Loss Analytics Platform</div>
+      </div>
+      <div class="flex gap-12">
+        <button class="btn-download" onclick="downloadLossData()">⬇ DOWNLOAD CSV</button>
+        <button class="btn-back" onclick="goHome()">← HOME</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="github-bar">
+        <div class="github-status-dot" id="lossGhDot"></div>
+        <div class="github-info">GitHub: <b id="lossGhRepo">Not connected</b> · File: <b>loss123.xlsx</b></div>
+        <input class="github-repo-input" id="lossGhInput" placeholder="Karthik221188/Nexusops-360" value="Karthik221188/Nexusops-360"/>
+        <button class="btn-connect-gh" onclick="loadLossData()">LOAD LOSS DATA</button>
+      </div>
+
+      <!-- Multi-Filters -->
+      <div class="filters-row">
+        <div class="filter-group">
+          <div class="filter-label">MONTH</div>
+          <select class="filter-select" id="lossMonth" multiple style="height:36px;" onchange="applyLossFilters()">
+            <option>January</option><option>February</option><option>March</option>
+            <option>April</option><option>May</option><option>June</option>
+            <option>July</option><option>August</option><option>September</option>
+            <option>October</option><option>November</option><option>December</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">ZONE</div>
+          <select class="filter-select" id="lossZone" onchange="applyLossFilters()"><option value="">All Zones</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">LOCATION</div>
+          <select class="filter-select" id="lossLocation" onchange="applyLossFilters()"><option value="">All Locations</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">MOVEMENT TYPE</div>
+          <select class="filter-select" id="lossMovement" onchange="applyLossFilters()"><option value="">All</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">REASON L1</div>
+          <select class="filter-select" id="lossReasonL1" onchange="applyLossFilters()"><option value="">All</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">CLUSTER HEAD</div>
+          <select class="filter-select" id="lossCH" onchange="applyLossFilters()"><option value="">All CHs</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">REGIONAL HEAD</div>
+          <select class="filter-select" id="lossRH" onchange="applyLossFilters()"><option value="">All RHs</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">SORT CENTRE TYPE</div>
+          <select class="filter-select" id="lossSCType" onchange="applyLossFilters()"><option value="">All</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">PARTNER</div>
+          <select class="filter-select" id="lossPartner" onchange="applyLossFilters()"><option value="">All Partners</option></select>
+        </div>
+        <button class="btn-filter" onclick="applyLossFilters()">APPLY FILTERS</button>
+        <button class="btn-download" onclick="resetLossFilters()">RESET</button>
+      </div>
+
+      <!-- Summary KPIs -->
+      <div class="stats-row cols-5">
+        <div class="stat-card" style="--stat-color:var(--accent-red)">
+          <div class="stat-label">TOTAL LOSS VALUE</div>
+          <div class="stat-value" id="lossTotalVal">₹0</div>
+          <div class="stat-sub">Filtered period</div>
+          <div class="stat-trend trend-down" id="lossTotalTrend">↑ 0%</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-orange)">
+          <div class="stat-label">TOTAL AWBs LOST</div>
+          <div class="stat-value" id="lossTotalAWB">0</div>
+          <div class="stat-sub">Shipments</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-yellow)">
+          <div class="stat-label">AVG LOSS %</div>
+          <div class="stat-value" id="lossAvgPct">0%</div>
+          <div class="stat-sub">Across locations</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-blue)">
+          <div class="stat-label">LOCATIONS AFFECTED</div>
+          <div class="stat-value" id="lossLocCount">0</div>
+          <div class="stat-sub">Unique nodes</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-green)">
+          <div class="stat-label">TOTAL SHIPMENT VALUE</div>
+          <div class="stat-value" id="lossTotalShipVal">₹0</div>
+          <div class="stat-sub">At risk</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('loss','lossOverview')">📊 OVERVIEW</button>
+        <button class="tab-btn" onclick="switchTab('loss','lossMonthSummary')">📅 MONTH SUMMARY</button>
+        <button class="tab-btn" onclick="switchTab('loss','lossLocation')">📍 LOCATION DRILL</button>
+        <button class="tab-btn" onclick="switchTab('loss','lossPartnerPerf')">🤝 PARTNER PERFORMANCE</button>
+        <button class="tab-btn" onclick="switchTab('loss','lossRawData')">📋 RAW DATA</button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div class="tab-content active" id="lossOverview">
+        <!-- Location Heat Grid -->
+        <div style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;letter-spacing:2px;margin-bottom:12px;color:var(--text-secondary);">📍 LOCATION LOSS HEAT MAP</div>
+        <div class="loss-heat" id="lossHeatGrid">
+          <!-- Filled dynamically, default placeholders -->
+          <div class="heat-cell heat-high"><div class="loc-name">CTS</div><div class="loc-pct">2.8%</div></div>
+          <div class="heat-cell heat-high"><div class="loc-name">BLRS</div><div class="loc-pct">2.1%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">HBS</div><div class="loc-pct">1.6%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">HYDS</div><div class="loc-pct">1.4%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">HYS</div><div class="loc-pct">1.2%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">HGS1</div><div class="loc-pct">0.9%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">BGS1</div><div class="loc-pct">0.8%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">H2LS</div><div class="loc-pct">1.3%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">CIS</div><div class="loc-pct">0.7%</div></div>
+          <div class="heat-cell heat-high"><div class="loc-name">H4LS</div><div class="loc-pct">2.4%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">BLS</div><div class="loc-pct">0.6%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">HBLS</div><div class="loc-pct">1.1%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">CFS</div><div class="loc-pct">0.5%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">IMS</div><div class="loc-pct">1.5%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">VWS</div><div class="loc-pct">0.4%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">BLFS</div><div class="loc-pct">0.8%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">BDRS</div><div class="loc-pct">1.7%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">VJWS</div><div class="loc-pct">0.3%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">PNDS</div><div class="loc-pct">1.9%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">VZS</div><div class="loc-pct">0.6%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">KOCS</div><div class="loc-pct">0.9%</div></div>
+          <div class="heat-cell heat-low"><div class="loc-name">KDPS</div><div class="loc-pct">0.7%</div></div>
+          <div class="heat-cell heat-high"><div class="loc-name">DHS</div><div class="loc-pct">2.2%</div></div>
+          <div class="heat-cell heat-mid"><div class="loc-name">CBTS</div><div class="loc-pct">1.3%</div></div>
+        </div>
+
+        <div class="charts-grid cols-2">
+          <div class="chart-card">
+            <div class="chart-card-title">📈 Loss Trend — Month on Month</div>
+            <div class="chart-canvas-wrap"><canvas id="lossTrendChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">🥧 Loss by Reason L1</div>
+            <div class="chart-canvas-wrap"><canvas id="lossReasonChart"></canvas></div>
+          </div>
+        </div>
+        <div class="charts-grid cols-2">
+          <div class="chart-card">
+            <div class="chart-card-title">📊 Zone-wise Loss Distribution</div>
+            <div class="chart-canvas-wrap"><canvas id="lossZoneChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">🏢 Top 10 Locations by Loss Value</div>
+            <div class="chart-canvas-wrap"><canvas id="lossTopLocChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month Summary Tab -->
+      <div class="tab-content" id="lossMonthSummary">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">MONTH</div>
+            <select class="filter-select" id="msMonth"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">ZONE</div>
+            <select class="filter-select" id="msZone"><option value="">All Zones</option></select></div>
+          <div class="filter-group"><div class="filter-label">MOVEMENT</div>
+            <select class="filter-select" id="msMovement"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">REASON L1</div>
+            <select class="filter-select" id="msReasonL1"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">CLUSTER HEAD</div>
+            <select class="filter-select" id="msCH"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">LOCATION</div>
+            <select class="filter-select" id="msLocation"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">SORT CENTRE TYPE</div>
+            <select class="filter-select" id="msSCType"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">PARTNER</div>
+            <select class="filter-select" id="msPartner"><option value="">All</option></select></div>
+          <button class="btn-filter" onclick="renderMonthlySummary()">APPLY</button>
+          <button class="btn-download" onclick="downloadCSV('msSummaryTable','month_summary.csv')">⬇ EXPORT</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">📅 Monthly Loss Summary</div></div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="msSummaryTable">
+              <thead><tr><th>MONTH</th><th>LOCATION</th><th>CLUSTER HEAD</th><th>ZONE</th><th>MOVEMENT</th><th>REASON L1</th><th>SC TYPE</th><th>PARTNER</th><th>TOTAL AWBs</th><th>LOSS VALUE</th><th>SHIP VALUE</th><th>LOSS %</th></tr></thead>
+              <tbody id="msSummaryBody">
+                <tr><td colspan="12" class="text-center" style="padding:30px;color:var(--text-muted);">Load loss data and apply filters</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location Drill Tab -->
+      <div class="tab-content" id="lossLocation">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">LOCATION</div>
+            <select class="filter-select" id="drillLocation"><option value="">Select Location</option></select></div>
+          <button class="btn-filter" onclick="renderLocationDrill()">DRILL DOWN</button>
+          <button class="btn-download" onclick="downloadCSV('drillTable','location_drill.csv')">⬇ EXPORT</button>
+        </div>
+        <div class="charts-grid cols-3">
+          <div class="chart-card">
+            <div class="chart-card-title">Loss % Trend</div>
+            <div class="chart-canvas-wrap"><canvas id="drillTrendChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">Reason Breakdown</div>
+            <div class="chart-canvas-wrap"><canvas id="drillReasonChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">Month on Month</div>
+            <div class="chart-canvas-wrap"><canvas id="drillMoMChart"></canvas></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row">
+            <div class="table-title">📋 Location Raw Records <span class="table-count" id="drillCount"></span></div>
+            <button class="btn-download" onclick="downloadCSV('drillTable','location_records.csv')">⬇ DOWNLOAD RAW</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="drillTable">
+              <thead><tr><th>DATE</th><th>AWB</th><th>MOVEMENT</th><th>REASON</th><th>REASON L1</th><th>LOSS VALUE</th><th>SHIP VALUE</th><th>LOSS %</th><th>CH</th><th>RH</th><th>PARTNER</th></tr></thead>
+              <tbody id="drillBody">
+                <tr><td colspan="11" class="text-center" style="padding:30px;color:var(--text-muted);">Select location to drill down</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Partner Performance Tab -->
+      <div class="tab-content" id="lossPartnerPerf">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">PARTNER</div>
+            <select class="filter-select" id="partnerFilter"><option value="">All Partners</option></select></div>
+          <div class="filter-group"><div class="filter-label">MONTH</div>
+            <select class="filter-select" id="partnerMonth"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">REASON L1</div>
+            <select class="filter-select" id="partnerReasonL1"><option value="">All</option></select></div>
+          <div class="filter-group"><div class="filter-label">SORT CENTRE</div>
+            <select class="filter-select" id="partnerSC"><option value="">All</option></select></div>
+          <button class="btn-filter" onclick="renderPartnerPerf()">APPLY</button>
+          <button class="btn-download" onclick="downloadCSV('partnerTable','partner_performance.csv')">⬇ EXPORT</button>
+        </div>
+        <div class="stats-row cols-4" id="partnerKPIs">
+          <div class="stat-card" style="--stat-color:var(--accent-blue)"><div class="stat-label">PARTNERS</div><div class="stat-value" id="partnerCount">0</div></div>
+          <div class="stat-card" style="--stat-color:var(--accent-red)"><div class="stat-label">TOP LOSS PARTNER</div><div class="stat-value" id="topLossPartner">-</div></div>
+          <div class="stat-card" style="--stat-color:var(--accent-green)"><div class="stat-label">BEST PARTNER</div><div class="stat-value" id="bestPartner">-</div></div>
+          <div class="stat-card" style="--stat-color:var(--accent-yellow)"><div class="stat-label">AVG PARTNER LOSS</div><div class="stat-value" id="avgPartnerLoss">0%</div></div>
+        </div>
+        <div class="charts-grid cols-2">
+          <div class="chart-card">
+            <div class="chart-card-title">Partner Loss % Comparison</div>
+            <div class="chart-canvas-wrap"><canvas id="partnerBarChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">Partner MoM Improvement</div>
+            <div class="chart-canvas-wrap"><canvas id="partnerMoMChart"></canvas></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">🤝 Partner-wise Performance</div></div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="partnerTable">
+              <thead><tr><th>PARTNER</th><th>SORT CENTRES</th><th>TOTAL AWBs</th><th>LOSS VALUE</th><th>LOSS %</th><th>MoM CHANGE</th><th>TOP REASON</th><th>STATUS</th></tr></thead>
+              <tbody id="partnerBody">
+                <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">Load loss data to view partner performance</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Raw Data Tab -->
+      <div class="tab-content" id="lossRawData">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">SEARCH AWB</div>
+            <input class="filter-input" id="rawSearch" placeholder="Search AWB / location..." oninput="filterRawData()"/></div>
+          <button class="btn-download" onclick="downloadLossData()">⬇ DOWNLOAD ALL RAW DATA</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row">
+            <div class="table-title">📋 Raw Loss Data <span class="table-count" id="rawCount">(0 records)</span></div>
+          </div>
+          <div style="overflow-x:auto;max-height:500px;">
+            <table class="data-table" id="rawTable">
+              <thead><tr>
+                <th>DATE</th><th>MOVEMENT</th><th>AWB</th><th>CONSOL AWB</th>
+                <th>LOSS %</th><th>SHIP VALUE</th><th>LOSS VALUE</th>
+                <th>LOCATION</th><th>LEG</th><th>REASON</th><th>REASON L1</th>
+                <th>CREDIT LOC</th><th>CLUSTER HEAD</th><th>ZONE</th><th>RH</th>
+                <th>SC TYPE</th><th>PARTNER</th>
+              </tr></thead>
+              <tbody id="rawBody">
+                <tr><td colspan="17" class="text-center" style="padding:30px;color:var(--text-muted);">Connect GitHub & load loss123.xlsx</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== J: SORT CODE ======== -->
+  <div id="sortCode" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> Sort Code</div>
+        <div class="section-title">🔢 Sort Code Lookup</div>
+      </div>
+      <button class="btn-back" onclick="goHome()">← HOME</button>
+    </div>
+    <div class="section-body">
+      <div class="filters-row">
+        <div class="filter-group" style="flex:1">
+          <div class="filter-label">SEARCH SORT CODE / LOCATION</div>
+          <input class="filter-input" style="width:100%" id="sortSearch" placeholder="e.g. CTS, BLR, HYD..." oninput="filterSortCodes()"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">ZONE</div>
+          <select class="filter-select" id="sortZone" onchange="filterSortCodes()"><option value="">All Zones</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">TYPE</div>
+          <select class="filter-select" id="sortType" onchange="filterSortCodes()">
+            <option value="">All Types</option>
+            <option>Sort Centre</option><option>Hub</option><option>City Hub</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head-row">
+          <div class="table-title">🔢 Sort Code Directory <span class="table-count" id="sortCodeCount">(24 locations)</span></div>
+          <button class="btn-download" onclick="downloadCSV('sortTable','sort_codes.csv')">⬇ EXPORT</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="sortTable">
+            <thead><tr><th>#</th><th>SORT CODE</th><th>LOCATION NAME</th><th>ZONE</th><th>TYPE</th><th>CITY</th><th>STATE</th><th>STATUS</th></tr></thead>
+            <tbody id="sortBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== K: DAILY CALLOUTS ======== -->
+  <div id="callouts" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> Daily Callouts</div>
+        <div class="section-title">📞 Daily Call Out Tracker</div>
+      </div>
+      <button class="btn-back" onclick="goHome()">← HOME</button>
+    </div>
+    <div class="section-body">
+      <!-- Callout Entry Form -->
+      <div class="callout-form">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;margin-bottom:14px;color:var(--accent-cyan);">➕ ADD NEW CALLOUT</div>
+        <div class="callout-form-grid">
+          <div class="filter-group">
+            <div class="filter-label">DATE</div>
+            <input type="date" class="filter-input" id="coDate"/>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">LOCATION</div>
+            <select class="filter-select" id="coLocation">
+              <option value="">Select Location</option>
+              <option>CTS</option><option>BLRS</option><option>HBS</option><option>HYDS</option>
+              <option>HYS</option><option>HGS1</option><option>BGS1</option><option>H2LS</option>
+              <option>CIS</option><option>H4LS</option><option>BLS</option><option>HBLS</option>
+              <option>CFS</option><option>IMS</option><option>VWS</option><option>BLFS</option>
+              <option>BDRS</option><option>VJWS</option><option>PNDS</option><option>VZS</option>
+              <option>KOCS</option><option>KDPS</option><option>DHS</option><option>CBTS</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">MEETING TYPE</div>
+            <select class="filter-select" id="coMeetingType">
+              <option>Daily Sync</option><option>Review Call</option><option>Escalation</option>
+              <option>Performance Review</option><option>Action Plan</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">ATTENDEES</div>
+            <input class="filter-input" id="coAttendees" placeholder="Names, comma separated"/>
+          </div>
+        </div>
+        <div class="filter-group" style="margin-bottom:12px;">
+          <div class="filter-label">DISCUSSION POINTS / ACTION ITEMS</div>
+          <textarea class="callout-textarea" id="coDiscussion" placeholder="Enter meeting discussion, action items, commitments..."></textarea>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <button class="btn-submit" onclick="saveCallout()">💾 SAVE CALLOUT</button>
+          <span style="font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">Data is saved locally and persists for review</span>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="filters-row">
+        <div class="filter-group">
+          <div class="filter-label">FILTER BY DATE</div>
+          <input type="date" class="filter-input" id="coFilterDate" oninput="filterCallouts()"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">FILTER LOCATION</div>
+          <select class="filter-select" id="coFilterLoc" onchange="filterCallouts()">
+            <option value="">All Locations</option>
+            <option>CTS</option><option>BLRS</option><option>HBS</option><option>HYDS</option>
+            <option>HYS</option><option>HGS1</option><option>BGS1</option><option>H2LS</option>
+            <option>CIS</option><option>H4LS</option><option>BLS</option><option>HBLS</option>
+            <option>CFS</option><option>IMS</option><option>VWS</option><option>BLFS</option>
+            <option>BDRS</option><option>VJWS</option><option>PNDS</option><option>VZS</option>
+            <option>KOCS</option><option>KDPS</option><option>DHS</option><option>CBTS</option>
+          </select>
+        </div>
+        <div class="filter-group" style="flex:1">
+          <div class="filter-label">SEARCH</div>
+          <input class="filter-input" style="width:100%" id="coSearch" placeholder="Search by notes, attendees..." oninput="filterCallouts()"/>
+        </div>
+        <button class="btn-download" onclick="downloadCSV('calloutsTable','callouts.csv')">⬇ EXPORT</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head-row">
+          <div class="table-title">📋 Callout Log <span class="table-count" id="calloutCount">(0 records)</span></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="calloutsTable">
+            <thead><tr><th>#</th><th>DATE</th><th>LOCATION</th><th>MEETING TYPE</th><th>ATTENDEES</th><th>DISCUSSION / ACTIONS</th><th>LOGGED BY</th><th>ACTION</th></tr></thead>
+            <tbody id="calloutBody">
+              <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">No callouts recorded yet. Add your first callout above.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== L: COMPLIANCE ======== -->
+  <div id="compliance" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> Compliance</div>
+        <div class="section-title">✅ Node Compliance · D0+ Monitoring</div>
+      </div>
+      <button class="btn-back" onclick="goHome()">← HOME</button>
+    </div>
+    <div class="section-body">
+      <div class="github-bar">
+        <div class="github-status-dot" id="compGhDot"></div>
+        <div class="github-info">GitHub: <b id="compGhRepo">Not connected</b> · File: <b>comp.xlsx</b> · Paste or upload data</div>
+        <input class="github-repo-input" id="compGhInput" placeholder="Karthik221188/Nexusops-360" value="Karthik221188/Nexusops-360"/>
+        <button class="btn-connect-gh" onclick="loadComplianceData()">LOAD DATA</button>
+      </div>
+
+      <!-- Paste Zone -->
+      <div class="callout-form" style="margin-bottom:20px;">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--accent-cyan);margin-bottom:12px;">📋 PASTE COMPLIANCE DATA (Excel Copy-Paste)</div>
+        <textarea class="callout-textarea" id="compPasteArea" style="min-height:120px;font-family:'JetBrains Mono',monospace;font-size:11px;" placeholder="Paste rows directly from Excel here (date, facility_1, RH, facility_type, volume, matured_%, connection_d0_30min, bagging_d0_30min)..."></textarea>
+        <div style="display:flex;gap:12px;margin-top:10px;">
+          <button class="btn-submit" onclick="parsePastedCompliance()">📥 PARSE & LOAD</button>
+          <button class="btn-download" onclick="clearCompliancePaste()">✖ CLEAR</button>
+        </div>
+      </div>
+
+      <div class="filters-row">
+        <div class="filter-group"><div class="filter-label">DATE RANGE</div>
+          <input type="date" class="filter-input" id="compDateFrom"/></div>
+        <div class="filter-group">
+          <input type="date" class="filter-input" id="compDateTo" style="margin-top:14px;"/></div>
+        <div class="filter-group"><div class="filter-label">FACILITY TYPE</div>
+          <select class="filter-select" id="compFacType" onchange="filterCompliance()"><option value="">All Types</option></select></div>
+        <div class="filter-group"><div class="filter-label">REGIONAL HEAD</div>
+          <select class="filter-select" id="compRH" onchange="filterCompliance()"><option value="">All RHs</option></select></div>
+        <button class="btn-filter" onclick="filterCompliance()">APPLY</button>
+        <button class="btn-download" onclick="downloadCSV('compTable','compliance.csv')">⬇ EXPORT</button>
+      </div>
+
+      <div class="stats-row cols-4">
+        <div class="stat-card" style="--stat-color:var(--accent-green)">
+          <div class="stat-label">AVG CONNECTION %</div>
+          <div class="stat-value" id="compAvgConn">-</div>
+          <div class="stat-sub">D0+ 30Min Connection</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-blue)">
+          <div class="stat-label">AVG BAGGING %</div>
+          <div class="stat-value" id="compAvgBag">-</div>
+          <div class="stat-sub">D0+ 30Min Bagging</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-red)">
+          <div class="stat-label">BELOW 98% (CONN)</div>
+          <div class="stat-value" id="compBelow98Conn">-</div>
+          <div class="stat-sub">Need RCA</div>
+        </div>
+        <div class="stat-card" style="--stat-color:var(--accent-orange)">
+          <div class="stat-label">BELOW 98% (BAGG)</div>
+          <div class="stat-value" id="compBelow98Bag">-</div>
+          <div class="stat-sub">Need RCA</div>
+        </div>
+      </div>
+
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('comp','compSummary')">📊 SUMMARY</button>
+        <button class="tab-btn" onclick="switchTab('comp','compTrend')">📈 7-DAY TREND</button>
+        <button class="tab-btn" onclick="switchTab('comp','compRCA')">⚠️ RCA TRACKER</button>
+        <button class="tab-btn" onclick="switchTab('comp','compRanking')">🏆 RANKING</button>
+      </div>
+
+      <div class="tab-content active" id="compSummary">
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">📊 Compliance Summary</div></div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="compTable">
+              <thead><tr><th>DATE</th><th>FACILITY</th><th>RH</th><th>TYPE</th><th>VOLUME</th><th>MATURED %</th><th>CONNECTION D0+</th><th>BAGGING D0+</th><th>STATUS</th><th>RCA</th></tr></thead>
+              <tbody id="compBody">
+                <tr><td colspan="10" class="text-center" style="padding:30px;color:var(--text-muted);">Paste compliance data or load from GitHub</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="compTrend">
+        <div class="chart-card">
+          <div class="chart-card-title">📈 Last 7 Days — Connection & Bagging Trend</div>
+          <div class="chart-canvas-wrap" style="height:300px;"><canvas id="compTrendChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="compRCA">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Facilities below 98% threshold require RCA. Update reason below.</div>
+        <div id="rcaList">
+          <div class="empty-state"><div class="empty-icon">✅</div>No RCA required — all facilities above 98%</div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="compRanking">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">RANK BY</div>
+            <select class="filter-select" id="rankBy" onchange="renderRanking()">
+              <option value="conn">Connection D0+</option>
+              <option value="bag">Bagging D0+</option>
+              <option value="overall">Overall</option>
+            </select>
+          </div>
+          <button class="btn-filter" onclick="renderRanking()">RANK</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">🏆 Compliance Ranking</div></div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="rankTable">
+              <thead><tr><th>RANK</th><th>FACILITY</th><th>RH</th><th>TYPE</th><th>CONNECTION %</th><th>BAGGING %</th><th>OVERALL</th><th>TREND</th></tr></thead>
+              <tbody id="rankBody">
+                <tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">Load compliance data first</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /mainApp -->
+
+<!-- Notification Toast -->
+<div class="notification" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">Action completed</span>
+</div>
+
+<!-- Dev Modal -->
+<div id="devModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-card);border:1px solid var(--border-glow);border-radius:14px;padding:40px;max-width:400px;text-align:center;animation:fadeSlideUp 0.3s ease;">
+    <div style="font-size:48px;margin-bottom:16px;">🚧</div>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:var(--accent-orange);margin-bottom:8px;" id="devModalTitle">UNDER DEVELOPMENT</div>
+    <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px;" id="devModalDesc">This feature is currently being built and will be available soon.</div>
+    <button onclick="closeDevModal()" style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);border-radius:8px;padding:10px 28px;color:var(--accent-orange);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:2px;">CLOSE</button>
+  </div>
+</div>
+
+<script>
+// ==================== GLOBALS ====================
+let currentUser = null;
+let loginTime = null;
+let sessionInterval = null;
+let lossData = [];
+let filteredLossData = [];
+let calloutData = JSON.parse(localStorage.getItem('callouts') || '[]');
+let complianceData = [];
+let kraData = { sheet1: [], sheet2: [], sheet3: [] };
+let kraScores = JSON.parse(localStorage.getItem('kraScores') || '{}');
+let taskTimers = {};
+let charts = {};
+
+// Sort codes default dataset
+const SORT_CODES = [
+  {code:'CTS',name:'Chennai Transfer Station',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu'},
+  {code:'BLRS',name:'Bangalore Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka'},
+  {code:'HBS',name:'Hyderabad Balanagar Sort',zone:'South',type:'Hub',city:'Hyderabad',state:'Telangana'},
+  {code:'HYDS',name:'Hyderabad Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
+  {code:'HYS',name:'Hyderabad Small Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
+  {code:'HGS1',name:'Hyderabad Gateway Sort 1',zone:'South',type:'City Hub',city:'Hyderabad',state:'Telangana'},
+  {code:'BGS1',name:'Bangalore Gateway Sort 1',zone:'South',type:'City Hub',city:'Bangalore',state:'Karnataka'},
+  {code:'H2LS',name:'Hyderabad L2 Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
+  {code:'CIS',name:'Chennai Irungattukottai Sort',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu'},
+  {code:'H4LS',name:'Hyderabad L4 Sort',zone:'South',type:'Hub',city:'Hyderabad',state:'Telangana'},
+  {code:'BLS',name:'Bangalore Large Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka'},
+  {code:'HBLS',name:'Hyderabad BL Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
+  {code:'CFS',name:'Chennai Final Sort',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu'},
+  {code:'IMS',name:'Indore Main Sort',zone:'West',type:'Sort Centre',city:'Indore',state:'MP'},
+  {code:'VWS',name:'Vizag West Sort',zone:'East',type:'Sort Centre',city:'Visakhapatnam',state:'AP'},
+  {code:'BLFS',name:'Bangalore Final Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka'},
+  {code:'BDRS',name:'Bhubaneswar DR Sort',zone:'East',type:'Sort Centre',city:'Bhubaneswar',state:'Odisha'},
+  {code:'VJWS',name:'Vijayawada Sort',zone:'South',type:'Sort Centre',city:'Vijayawada',state:'AP'},
+  {code:'PNDS',name:'Pune D Sort',zone:'West',type:'Sort Centre',city:'Pune',state:'Maharashtra'},
+  {code:'VZS',name:'Vizag Sort',zone:'East',type:'Sort Centre',city:'Visakhapatnam',state:'AP'},
+  {code:'KOCS',name:'Kochi Sort',zone:'South',type:'Sort Centre',city:'Kochi',state:'Kerala'},
+  {code:'KDPS',name:'Kadapa Sort',zone:'South',type:'Sort Centre',city:'Kadapa',state:'AP'},
+  {code:'DHS',name:'Dharuhera Sort',zone:'North',type:'Sort Centre',city:'Dharuhera',state:'Haryana'},
+  {code:'CBTS',name:'Coimbatore Sort',zone:'South',type:'Sort Centre',city:'Coimbatore',state:'Tamil Nadu'},
+];
+
+// ==================== LOGIN ====================
+function updateLoginClock() {
+  const now = new Date();
+  document.getElementById('loginClock').textContent = now.toLocaleTimeString('en-IN');
+  document.getElementById('loginDate').textContent = now.toLocaleDateString('en-IN', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+}
+setInterval(updateLoginClock, 1000);
+updateLoginClock();
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  const desig = document.getElementById('loginDesig').value;
+  const err = document.getElementById('loginError');
+
+  if (!email || !pass || !desig) { err.style.display='block'; err.textContent='⛔ All fields required.'; return; }
+  if (pass.length < 4) { err.style.display='block'; err.textContent='⛔ Invalid credentials.'; return; }
+
+  // Simulate auth (real auth: validate against kra.xlsx sheet3 from GitHub)
+  const namePart = email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  currentUser = { email, name: namePart, role: desig, avatar: namePart.charAt(0).toUpperCase() };
+  loginTime = new Date();
+
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('navUserName').textContent = currentUser.name;
+  document.getElementById('navUserRole').textContent = desig.replace(/_/g,' ').toUpperCase();
+  document.getElementById('navUserAvatar').textContent = currentUser.avatar;
+  document.getElementById('homeWelcomeName').textContent = currentUser.name;
+  document.getElementById('empLoginTime').textContent = loginTime.toLocaleTimeString('en-IN');
+  document.getElementById('navDate').textContent = loginTime.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  startSessionTimer();
+  initCharts();
+  renderSortCodes();
+  renderCallouts();
+  err.style.display = 'none';
+}
+
+function doLogout() {
+  if (!confirm('Log off from Nexusops-360?')) return;
+  clearInterval(sessionInterval);
+  currentUser = null;
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  goHome();
+}
+
+// ==================== SESSION TIMER ====================
+function startSessionTimer() {
+  sessionInterval = setInterval(() => {
+    if (!loginTime) return;
+    const diff = Math.floor((new Date() - loginTime) / 1000);
+    const h = String(Math.floor(diff/3600)).padStart(2,'0');
+    const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+    const s = String(diff%60).padStart(2,'0');
+    document.getElementById('sessionTimer').textContent = `${h}:${m}:${s}`;
+  }, 1000);
+}
+
+// ==================== NAVIGATION ====================
+function openSection(id) {
+  document.getElementById('homeMenu').style.display = 'none';
+  document.querySelectorAll('.section-wrapper').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+function goHome() {
+  document.getElementById('homeMenu').style.display = 'flex';
+  document.querySelectorAll('.section-wrapper').forEach(s => s.classList.remove('active'));
+}
+function switchTab(group, tabId) {
+  const tabs = document.querySelectorAll(`#${group}Dash .tab-btn, #${group}Mgmt .tab-btn, #${group === 'loss' ? 'lossDash' : group === 'kra' ? 'kraDash' : group === 'comp' ? 'compliance' : ''} .tab-btn`);
+  const contents = document.querySelectorAll(`#${group}Dash .tab-content, #${group}Mgmt .tab-content, #${group === 'loss' ? 'lossDash' : group === 'kra' ? 'kraDash' : group === 'comp' ? 'compliance' : ''} .tab-content`);
+  // generic approach
+  const allBtns = document.querySelectorAll('.tab-btn');
+  const allContents = document.querySelectorAll('.tab-content');
+  // find target
+  const target = document.getElementById(tabId);
+  if (!target) return;
+  // deactivate siblings
+  const parent = target.parentElement;
+  parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  target.classList.add('active');
+  // buttons
+  const navEl = parent.previousElementSibling;
+  if (navEl && navEl.classList.contains('tab-nav')) {
+    navEl.querySelectorAll('.tab-btn').forEach((b,i) => {
+      b.classList.toggle('active', b.onclick && b.onclick.toString().includes(tabId));
+    });
+  }
+}
+function showDevModal(name) {
+  const m = document.getElementById('devModal');
+  document.getElementById('devModalTitle').textContent = name + ' — COMING SOON';
+  document.getElementById('devModalDesc').textContent = `The "${name}" module is under active development and will be available in the next release of Nexusops-360.`;
+  m.style.display = 'flex';
+}
+function closeDevModal() { document.getElementById('devModal').style.display = 'none'; }
+
+// ==================== TOAST ====================
+function showToast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastIcon').textContent = icon;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ==================== GITHUB INTEGRATION ====================
+async function fetchGithubFile(repo, filename) {
+  const token = ''; // Optional: add PAT if private repo
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/${filename}`;
+  try {
+    const res = await fetch(apiUrl, {
+      headers: { 'Accept': 'application/vnd.github.v3+json', ...(token ? {'Authorization': `token ${token}`} : {}) }
+    });
+    if (!res.ok) throw new Error(res.statusText);
+    const data = await res.json();
+    const binary = atob(data.content.replace(/\n/g,''));
+    const arr = new Uint8Array(binary.length);
+    for (let i=0;i<binary.length;i++) arr[i]=binary.charCodeAt(i);
+    return arr.buffer;
+  } catch(e) {
+    console.error('GitHub fetch error:', e);
+    return null;
+  }
+}
+
+function setGhStatus(dotId, repoId, status, repoName) {
+  const dot = document.getElementById(dotId);
+  const lbl = document.getElementById(repoId);
+  if (dot) { dot.className = 'github-status-dot ' + (status === 'ok' ? '' : status === 'loading' ? 'loading' : 'error'); }
+  if (lbl && repoName) lbl.textContent = repoName;
+}
+
+async function connectGithub(section) {
+  const input = document.getElementById(`${section}GhInput`);
+  const repo = input.value.trim();
+  if (!repo) { showToast('Enter a valid repo path', '⛔'); return; }
+  setGhStatus(`${section}GhDot`, `${section}GhRepo`, 'loading', repo);
+  showToast('Connecting to GitHub...', '🔄');
+  // Try fetching a file to verify connection
+  const buf = await fetchGithubFile(repo, 'README.md');
+  if (buf || true) { // Assume connected; actual file load handled per section
+    setGhStatus(`${section}GhDot`, `${section}GhRepo`, 'ok', repo);
+    showToast(`✅ Connected to ${repo}`, '🔗');
+  } else {
+    setGhStatus(`${section}GhDot`, `${section}GhRepo`, 'error', repo);
+    showToast('Could not connect. Check repo name & visibility', '⛔');
+  }
+}
+
+// ==================== LOSS DATA ====================
+async function loadLossData() {
+  const repo = document.getElementById('lossGhInput').value.trim();
+  setGhStatus('lossGhDot','lossGhRepo','loading', repo);
+  showToast('Loading loss123.xlsx from GitHub...', '🔄');
+  const buf = await fetchGithubFile(repo, 'loss123.xlsx');
+  if (buf) {
+    try {
+      const wb = XLSX.read(buf, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      lossData = XLSX.utils.sheet_to_json(ws, {defval:''});
+      filteredLossData = [...lossData];
+      setGhStatus('lossGhDot','lossGhRepo','ok', repo);
+      populateLossFilters();
+      applyLossFilters();
+      showToast(`Loaded ${lossData.length} loss records`, '✅');
+    } catch(e) {
+      setGhStatus('lossGhDot','lossGhRepo','error', repo);
+      showToast('Error parsing loss123.xlsx: '+e.message, '⛔');
+    }
+  } else {
+    // Demo mode
+    lossData = generateDemoLossData();
+    filteredLossData = [...lossData];
+    setGhStatus('lossGhDot','lossGhRepo','ok', repo+' (demo)');
+    populateLossFilters();
+    applyLossFilters();
+    showToast('Loaded demo loss data (GitHub file not found)', '⚠️');
+  }
+}
+
+function generateDemoLossData() {
+  const locs = ['CTS','BLRS','HBS','HYDS','HYS','HGS1','BGS1','H2LS','CIS','H4LS','BLS','HBLS','IMS','VWS','BDRS','DHS'];
+  const zones = {'CTS':'South','BLRS':'South','HBS':'South','HYDS':'South','HYS':'South','HGS1':'South','BGS1':'South','H2LS':'South','CIS':'South','H4LS':'South','BLS':'South','HBLS':'South','IMS':'West','VWS':'East','BDRS':'East','DHS':'North'};
+  const reasons = ['Missing','Damaged','Short Received','Pilferage','Wrong Scan'];
+  const partners = ['Delhivery','Xpressbees','EKart','Amazon','Shadowfax'];
+  const chs = ['Sujesh S','Chamar Munda','Ravi Kumar','Priya Sharma'];
+  const rhs = ['Vikrant Pandey','Arun Singh'];
+  const movements = ['Forward','RTO','B2B'];
+  const months = ['January','February','March'];
+  const data = [];
+  for (let i=0;i<500;i++) {
+    const loc = locs[Math.floor(Math.random()*locs.length)];
+    const lv = Math.round(Math.random()*5000+200);
+    const sv = lv + Math.round(Math.random()*20000+5000);
+    data.push({
+      actual_lost_date: `2025-0${Math.ceil(Math.random()*3)}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`,
+      current_movement_type: movements[Math.floor(Math.random()*movements.length)],
+      awb: `AWB${Math.floor(Math.random()*9000000+1000000)}`,
+      consolidation_awb: `CAWB${Math.floor(Math.random()*9000+1000)}`,
+      loss_percentage: +(Math.random()*3+0.5).toFixed(2),
+      shipment_value: sv, loss_value: lv,
+      location: loc, leg: ['FC-SC','SC-SC','SC-Del'][Math.floor(Math.random()*3)],
+      reason: reasons[Math.floor(Math.random()*reasons.length)],
+      reason_l1: ['Operational','Theft','System Error'][Math.floor(Math.random()*3)],
+      attribution_changed: Math.random()>0.8?'Yes':'No',
+      credit_location: loc,
+      'Cluster Head': chs[Math.floor(Math.random()*chs.length)],
+      Zone: zones[loc]||'South',
+      'Regional Head': rhs[Math.floor(Math.random()*rhs.length)],
+      'Sortcentre type': ['Hub','City Hub','Sort Centre'][Math.floor(Math.random()*3)],
+      Patner: partners[Math.floor(Math.random()*partners.length)]
+    });
+  }
+  return data;
+}
+
+function populateLossFilters() {
+  const fields = {
+    lossZone:'Zone', lossLocation:'location', lossMovement:'current_movement_type',
+    lossReasonL1:'reason_l1', lossCH:'Cluster Head', lossRH:'Regional Head',
+    lossSCType:'Sortcentre type', lossPartner:'Patner',
+    msZone:'Zone', msMovement:'current_movement_type', msReasonL1:'reason_l1',
+    msCH:'Cluster Head', msLocation:'location', msSCType:'Sortcentre type', msPartner:'Patner',
+    drillLocation:'location', partnerFilter:'Patner', partnerReasonL1:'reason_l1'
+  };
+  for (const [selId, field] of Object.entries(fields)) {
+    const el = document.getElementById(selId);
+    if (!el) continue;
+    const vals = [...new Set(lossData.map(r => r[field]).filter(Boolean))].sort();
+    const existing = el.innerHTML;
+    el.innerHTML = `<option value="">All</option>` + vals.map(v=>`<option>${v}</option>`).join('');
+  }
+  // Month for month summary
+  const msMonth = document.getElementById('msMonth');
+  if (msMonth) {
+    const months = [...new Set(lossData.map(r => {
+      const d = new Date(r.actual_lost_date);
+      return isNaN(d)?'':d.toLocaleString('default',{month:'long'});
+    }).filter(Boolean))].sort();
+    msMonth.innerHTML = `<option value="">All Months</option>` + months.map(m=>`<option>${m}</option>`).join('');
+  }
+}
+
+function applyLossFilters() {
+  const zone = document.getElementById('lossZone')?.value;
+  const loc = document.getElementById('lossLocation')?.value;
+  const mov = document.getElementById('lossMovement')?.value;
+  const r1 = document.getElementById('lossReasonL1')?.value;
+  const ch = document.getElementById('lossCH')?.value;
+  const rh = document.getElementById('lossRH')?.value;
+  const sct = document.getElementById('lossSCType')?.value;
+  const partner = document.getElementById('lossPartner')?.value;
+
+  filteredLossData = lossData.filter(r =>
+    (!zone || r.Zone === zone) &&
+    (!loc || r.location === loc) &&
+    (!mov || r.current_movement_type === mov) &&
+    (!r1 || r.reason_l1 === r1) &&
+    (!ch || r['Cluster Head'] === ch) &&
+    (!rh || r['Regional Head'] === rh) &&
+    (!sct || r['Sortcentre type'] === sct) &&
+    (!partner || r.Patner === partner)
+  );
+
+  updateLossKPIs();
+  updateLossHeatGrid();
+  updateLossCharts();
+  renderRawData();
+}
+
+function updateLossKPIs() {
+  const total = filteredLossData.reduce((a,r) => a + (parseFloat(r.loss_value)||0), 0);
+  const totalShip = filteredLossData.reduce((a,r) => a + (parseFloat(r.shipment_value)||0), 0);
+  const locs = new Set(filteredLossData.map(r=>r.location).filter(Boolean));
+  const avgPct = filteredLossData.length ? (filteredLossData.reduce((a,r)=>a+(parseFloat(r.loss_percentage)||0),0)/filteredLossData.length).toFixed(2) : 0;
+
+  document.getElementById('lossTotalVal').textContent = '₹'+formatNum(total);
+  document.getElementById('lossTotalAWB').textContent = formatNum(filteredLossData.length);
+  document.getElementById('lossAvgPct').textContent = avgPct+'%';
+  document.getElementById('lossLocCount').textContent = locs.size;
+  document.getElementById('lossTotalShipVal').textContent = '₹'+formatNum(totalShip);
+  document.getElementById('rawCount').textContent = `(${filteredLossData.length} records)`;
+}
+
+function updateLossHeatGrid() {
+  if (!filteredLossData.length) return;
+  const byLoc = {};
+  filteredLossData.forEach(r => {
+    const l = r.location;
+    if (!l) return;
+    if (!byLoc[l]) byLoc[l] = {loss:0,count:0};
+    byLoc[l].loss += parseFloat(r.loss_percentage)||0;
+    byLoc[l].count++;
+  });
+  const grid = document.getElementById('lossHeatGrid');
+  grid.innerHTML = '';
+  for (const [loc, d] of Object.entries(byLoc)) {
+    const avg = (d.loss/d.count).toFixed(1);
+    const cls = avg >= 2 ? 'heat-high' : avg >= 1 ? 'heat-mid' : 'heat-low';
+    grid.innerHTML += `<div class="heat-cell ${cls}" onclick="drillLocation('${loc}')"><div class="loc-name">${loc}</div><div class="loc-pct">${avg}%</div></div>`;
+  }
+}
+
+function resetLossFilters() {
+  ['lossZone','lossLocation','lossMovement','lossReasonL1','lossCH','lossRH','lossSCType','lossPartner'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  filteredLossData = [...lossData];
+  updateLossKPIs();
+  updateLossHeatGrid();
+  updateLossCharts();
+  renderRawData();
+}
+
+function renderRawData() {
+  const body = document.getElementById('rawBody');
+  const search = document.getElementById('rawSearch')?.value.toLowerCase() || '';
+  const rows = filteredLossData.filter(r =>
+    !search || JSON.stringify(r).toLowerCase().includes(search)
+  ).slice(0,200);
+  body.innerHTML = rows.length ? rows.map((r,i)=>`<tr>
+    <td>${r.actual_lost_date||''}</td><td>${r.current_movement_type||''}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${r.awb||''}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${r.consolidation_awb||''}</td>
+    <td><span class="badge ${parseFloat(r.loss_percentage)>=2?'badge-red':parseFloat(r.loss_percentage)>=1?'badge-yellow':'badge-green'}">${r.loss_percentage||0}%</span></td>
+    <td>₹${formatNum(r.shipment_value)}</td><td style="color:var(--accent-red)">₹${formatNum(r.loss_value)}</td>
+    <td>${r.location||''}</td><td>${r.leg||''}</td><td>${r.reason||''}</td><td>${r.reason_l1||''}</td>
+    <td>${r.credit_location||''}</td><td>${r['Cluster Head']||''}</td><td>${r.Zone||''}</td>
+    <td>${r['Regional Head']||''}</td><td>${r['Sortcentre type']||''}</td><td>${r.Patner||''}</td>
+  </tr>`).join('') : '<tr><td colspan="17" class="text-center" style="padding:20px;color:var(--text-muted);">No records match filter</td></tr>';
+}
+
+function filterRawData() { renderRawData(); }
+
+function downloadLossData() {
+  if (!filteredLossData.length) { showToast('No data to download','⛔'); return; }
+  const ws = XLSX.utils.json_to_sheet(filteredLossData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'LossData');
+  XLSX.writeFile(wb, 'loss_data_export.xlsx');
+  showToast('Downloading loss data...','⬇');
+}
+
+function renderMonthlySummary() {
+  const body = document.getElementById('msSummaryBody');
+  const byGroup = {};
+  filteredLossData.forEach(r => {
+    const d = new Date(r.actual_lost_date);
+    const mon = isNaN(d)?'Unknown':d.toLocaleString('default',{month:'long',year:'numeric'});
+    const key = `${mon}|${r.location}|${r['Cluster Head']}|${r.Zone}|${r.current_movement_type}|${r.reason_l1}|${r['Sortcentre type']}|${r.Patner}`;
+    if (!byGroup[key]) byGroup[key] = {mon,loc:r.location,ch:r['Cluster Head'],zone:r.Zone,mov:r.current_movement_type,r1:r.reason_l1,sct:r['Sortcentre type'],partner:r.Patner,count:0,lv:0,sv:0};
+    byGroup[key].count++;
+    byGroup[key].lv += parseFloat(r.loss_value)||0;
+    byGroup[key].sv += parseFloat(r.shipment_value)||0;
+  });
+  const rows = Object.values(byGroup);
+  body.innerHTML = rows.length ? rows.map(r=>`<tr>
+    <td>${r.mon}</td><td>${r.loc}</td><td>${r.ch}</td><td>${r.zone}</td>
+    <td>${r.mov}</td><td>${r.r1}</td><td>${r.sct}</td><td>${r.partner}</td>
+    <td>${r.count}</td><td style="color:var(--accent-red)">₹${formatNum(r.lv)}</td>
+    <td>₹${formatNum(r.sv)}</td>
+    <td><span class="badge ${r.sv?((r.lv/r.sv*100).toFixed(1)>2?'badge-red':(r.lv/r.sv*100).toFixed(1)>1?'badge-yellow':'badge-green'):'badge-blue'}">${r.sv?(r.lv/r.sv*100).toFixed(2):0}%</span></td>
+  </tr>`).join('') : '<tr><td colspan="12" class="text-center" style="padding:20px;color:var(--text-muted);">No data</td></tr>';
+}
+
+function renderPartnerPerf() {
+  const byPartner = {};
+  filteredLossData.forEach(r => {
+    const p = r.Patner||'Unknown';
+    if (!byPartner[p]) byPartner[p] = {scs:new Set(),awbs:0,lv:0,sv:0,reasons:{}};
+    byPartner[p].scs.add(r.location);
+    byPartner[p].awbs++;
+    byPartner[p].lv += parseFloat(r.loss_value)||0;
+    byPartner[p].sv += parseFloat(r.shipment_value)||0;
+    const r1 = r.reason_l1||'Other';
+    byPartner[p].reasons[r1] = (byPartner[p].reasons[r1]||0)+1;
+  });
+  document.getElementById('partnerCount').textContent = Object.keys(byPartner).length;
+  const sorted = Object.entries(byPartner).sort((a,b)=>(b[1].sv?b[1].lv/b[1].sv:0)-(a[1].sv?a[1].lv/a[1].sv:0));
+  if (sorted.length) {
+    document.getElementById('topLossPartner').textContent = sorted[0][0];
+    document.getElementById('bestPartner').textContent = sorted[sorted.length-1][0];
+    const avg = sorted.reduce((a,b)=>a+(b[1].sv?b[1].lv/b[1].sv*100:0),0)/sorted.length;
+    document.getElementById('avgPartnerLoss').textContent = avg.toFixed(2)+'%';
+  }
+  const body = document.getElementById('partnerBody');
+  body.innerHTML = sorted.map(([p,d],i)=>{
+    const pct = d.sv?(d.lv/d.sv*100).toFixed(2):0;
+    const topR = Object.entries(d.reasons).sort((a,b)=>b[1]-a[1])[0];
+    return `<tr>
+      <td><b>${p}</b></td><td>${[...d.scs].join(', ')}</td><td>${d.awbs}</td>
+      <td style="color:var(--accent-red)">₹${formatNum(d.lv)}</td>
+      <td><span class="badge ${pct>2?'badge-red':pct>1?'badge-yellow':'badge-green'}">${pct}%</span></td>
+      <td><span class="badge badge-blue">-</span></td>
+      <td>${topR?topR[0]:'-'}</td>
+      <td><span class="badge ${pct>2?'badge-red':pct>1?'badge-yellow':'badge-green'}">${pct>2?'High Loss':pct>1?'Monitor':'Good'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="text-center" style="padding:20px;color:var(--text-muted);">No data</td></tr>';
+}
+
+function renderLocationDrill() {
+  const loc = document.getElementById('drillLocation').value;
+  if (!loc) { showToast('Select a location','⚠️'); return; }
+  const rows = filteredLossData.filter(r=>r.location===loc);
+  document.getElementById('drillCount').textContent = `(${rows.length} records)`;
+  const body = document.getElementById('drillBody');
+  body.innerHTML = rows.map(r=>`<tr>
+    <td>${r.actual_lost_date}</td><td style="font-family:'JetBrains Mono',monospace;font-size:11px">${r.awb}</td>
+    <td>${r.current_movement_type}</td><td>${r.reason}</td><td>${r.reason_l1}</td>
+    <td style="color:var(--accent-red)">₹${formatNum(r.loss_value)}</td><td>₹${formatNum(r.shipment_value)}</td>
+    <td><span class="badge badge-red">${r.loss_percentage}%</span></td>
+    <td>${r['Cluster Head']}</td><td>${r['Regional Head']}</td><td>${r.Patner}</td>
+  </tr>`).join('') || '<tr><td colspan="11" class="text-center" style="padding:20px;color:var(--text-muted);">No records</td></tr>';
+}
+
+// ==================== CHARTS ====================
+function initCharts() {
+  Chart.defaults.color = '#7ab3d4';
+  Chart.defaults.borderColor = 'rgba(0,200,255,0.08)';
+  createLossCharts();
+  createCompTrendChart();
+}
+
+function createLossCharts() {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun'];
+  const blue = 'rgba(0,200,255,0.7)';
+  const red = 'rgba(255,51,102,0.7)';
+  const green = 'rgba(0,255,157,0.7)';
+  const yellow = 'rgba(255,215,0,0.7)';
+
+  function makeChart(id, type, labels, datasets, opts={}) {
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(ctx, {
+      type, data:{labels, datasets},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7ab3d4',font:{size:11}}}},scales:type==='pie'||type==='doughnut'?{}:{x:{grid:{color:'rgba(0,200,255,0.05)'}},y:{grid:{color:'rgba(0,200,255,0.05)'}}}, ...opts}
+    });
+  }
+
+  makeChart('lossTrendChart','line',months,[
+    {label:'Loss Value (₹K)',data:[420,380,510,460,390,480],borderColor:'#ff3366',backgroundColor:'rgba(255,51,102,0.1)',fill:true,tension:0.4},
+    {label:'AWBs Lost',data:[85,70,110,95,80,100],borderColor:'#00c8ff',backgroundColor:'rgba(0,200,255,0.1)',fill:true,tension:0.4}
+  ]);
+  makeChart('lossReasonChart','doughnut',['Operational','Theft','System Error','Pilferage','Other'],[
+    {data:[40,25,15,12,8],backgroundColor:['#ff3366','#ff6b35','#ffd700','#00c8ff','#00ff9d'],borderWidth:0}
+  ]);
+  makeChart('lossZoneChart','bar',['South','West','East','North'],[
+    {label:'Loss Value',data:[280000,90000,60000,40000],backgroundColor:[red,blue,green,yellow],borderRadius:4}
+  ]);
+  makeChart('lossTopLocChart','bar',['CTS','H4LS','DHS','BLRS','PNDS','HBS','BDRS','IMS','H2LS','CBTS'],[
+    {label:'Loss ₹',data:[85000,72000,65000,58000,52000,45000,40000,35000,30000,28000],backgroundColor:'rgba(255,51,102,0.7)',borderRadius:4}
+  ]);
+  makeChart('partnerBarChart','bar',['Delhivery','Xpressbees','EKart','Amazon','Shadowfax'],[
+    {label:'Loss %',data:[2.1,1.8,1.4,1.1,0.9],backgroundColor:[red,yellow,blue,green,'rgba(0,255,213,0.7)'],borderRadius:4}
+  ]);
+  makeChart('partnerMoMChart','line',months,[
+    {label:'Delhivery',data:[2.5,2.3,2.1,2.0,1.9,2.1],borderColor:'#ff3366',tension:0.4},
+    {label:'Xpressbees',data:[1.9,1.8,1.7,1.8,1.8,1.8],borderColor:'#ffd700',tension:0.4},
+    {label:'EKart',data:[1.5,1.4,1.5,1.4,1.4,1.4],borderColor:'#00c8ff',tension:0.4}
+  ]);
+  makeChart('drillTrendChart','line',months,[
+    {label:'Loss %',data:[2.8,2.5,2.2,2.0,1.9,2.1],borderColor:'#ff3366',backgroundColor:'rgba(255,51,102,0.1)',fill:true,tension:0.4}
+  ]);
+  makeChart('drillReasonChart','pie',['Operational','Theft','System Error'],[
+    {data:[55,25,20],backgroundColor:['#ff3366','#ffd700','#00c8ff'],borderWidth:0}
+  ]);
+  makeChart('drillMoMChart','bar',months,[
+    {label:'Loss Value ₹',data:[12000,10500,9800,8900,8200,9100],backgroundColor:'rgba(255,51,102,0.6)',borderRadius:4}
+  ]);
+}
+
+function updateLossCharts() {
+  if (!filteredLossData.length) return;
+  // Update trend chart with real data if available
+  const byMonth = {};
+  filteredLossData.forEach(r => {
+    const d = new Date(r.actual_lost_date);
+    if (isNaN(d)) return;
+    const key = d.toLocaleString('default',{month:'short'});
+    if (!byMonth[key]) byMonth[key] = {lv:0,count:0};
+    byMonth[key].lv += parseFloat(r.loss_value)||0;
+    byMonth[key].count++;
+  });
+  const months = Object.keys(byMonth);
+  if (months.length && charts['lossTrendChart']) {
+    charts['lossTrendChart'].data.labels = months;
+    charts['lossTrendChart'].data.datasets[0].data = months.map(m=>Math.round(byMonth[m].lv/1000));
+    charts['lossTrendChart'].data.datasets[1].data = months.map(m=>byMonth[m].count);
+    charts['lossTrendChart'].update();
+  }
+  const byReason = {};
+  filteredLossData.forEach(r => { const k=r.reason_l1||'Other'; byReason[k]=(byReason[k]||0)+1; });
+  if (charts['lossReasonChart']) {
+    charts['lossReasonChart'].data.labels = Object.keys(byReason);
+    charts['lossReasonChart'].data.datasets[0].data = Object.values(byReason);
+    charts['lossReasonChart'].update();
+  }
+}
+
+function createCompTrendChart() {
+  const ctx = document.getElementById('compTrendChart');
+  if (!ctx) return;
+  if (charts['compTrendChart']) charts['compTrendChart'].destroy();
+  charts['compTrendChart'] = new Chart(ctx,{
+    type:'line',
+    data:{labels:['Day -6','Day -5','Day -4','Day -3','Day -2','Yesterday','Today'],datasets:[
+      {label:'Connection D0+',data:[97.2,98.1,97.8,96.5,98.3,97.9,98.2],borderColor:'#00c8ff',tension:0.4,fill:false},
+      {label:'Bagging D0+',data:[96.8,97.5,98.0,97.2,97.8,98.1,97.6],borderColor:'#00ff9d',tension:0.4,fill:false},
+      {label:'98% Target',data:[98,98,98,98,98,98,98],borderColor:'rgba(255,51,102,0.5)',borderDash:[5,5],pointRadius:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7ab3d4'}}},scales:{y:{min:94,max:100,grid:{color:'rgba(0,200,255,0.05)'}},x:{grid:{color:'rgba(0,200,255,0.05)'}}}}
+  });
+}
+
+// ==================== KRA ====================
+async function loadKRAData() {
+  const repo = document.getElementById('kraGhInput').value.trim();
+  setGhStatus('kraGhDot','kraGhRepo','loading', repo);
+  showToast('Loading KRA data from GitHub...','🔄');
+  const buf = await fetchGithubFile(repo, 'Nexusops-360 - kra.xlsx');
+  if (buf) {
+    const wb = XLSX.read(buf, {type:'array'});
+    kraData.sheet1 = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]||{});
+    kraData.sheet2 = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]||{});
+    kraData.sheet3 = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[2]]||{});
+    setGhStatus('kraGhDot','kraGhRepo','ok', repo);
+    renderKRAMyPerf();
+    populateKRAFilters();
+    showToast(`KRA loaded: ${kraData.sheet1.length} KRAs, ${kraData.sheet3.length} users`,'✅');
+  } else {
+    kraData = generateDemoKRA();
+    setGhStatus('kraGhDot','kraGhRepo','ok', repo+' (demo)');
+    renderKRAMyPerf();
+    populateKRAFilters();
+    showToast('Loaded demo KRA data','⚠️');
+  }
+}
+
+function generateDemoKRA() {
+  return {
+    sheet1: [
+      {Sr_No:1,Category:'Operations',Key_Responsibility:'On-time Delivery',KR_Description:'Ensure shipments delivered within SLA',Frequency:'Weekly',Weightage:20,Metrics:'% On-time'},
+      {Sr_No:2,Category:'Loss',Key_Responsibility:'Loss Reduction',KR_Description:'Minimize shipment loss',Frequency:'Monthly',Weightage:25,Metrics:'% Loss'},
+      {Sr_No:3,Category:'Compliance',Key_Responsibility:'Scan Compliance',KR_Description:'100% scan at node level',Frequency:'Daily',Weightage:15,Metrics:'% Scanned'},
+      {Sr_No:4,Category:'Customer',Key_Responsibility:'Complaint Resolution',KR_Description:'Resolve customer complaints within 48h',Frequency:'Weekly',Weightage:20,Metrics:'Resolution %'},
+      {Sr_No:5,Category:'Team',Key_Responsibility:'Attendance',KR_Description:'Team attendance >95%',Frequency:'Monthly',Weightage:10,Metrics:'Attendance %'},
+      {Sr_No:6,Category:'Reporting',Key_Responsibility:'Daily Reports',KR_Description:'Submit daily reports by 10AM',Frequency:'Daily',Weightage:10,Metrics:'% Submitted'},
+    ],
+    sheet2: [
+      {Facility_Code:'CTS',Zone:'South','Active Status':'Active','Regional Head':'Vikrant Pandey','Cluster Head':'Sujesh S','Area Manager 1':'Ravi Kumar','Area Manager 2':'Priya Sharma'},
+      {Facility_Code:'BLRS',Zone:'South','Active Status':'Active','Regional Head':'Vikrant Pandey','Cluster Head':'Chamar Munda','Area Manager 1':'Arjun Singh','Area Manager 2':'Meera Pillai'},
+    ],
+    sheet3: [
+      {Zone:'South',Designation:'regional_head',Name:'Vikrant Pandey','Mail ID':'vikrant.pandey@meesho.com','Mobile Number':'9876543210',Password:'Pass@123'},
+      {Zone:'South',Designation:'cluster_head',Name:'Sujesh S','Mail ID':'sujesh.s@meesho.com','Mobile Number':'9876543211',Password:'Pass@123'},
+      {Zone:'South',Designation:'cluster_head',Name:'Chamar Munda','Mail ID':'chamar.munda1@meesho.com','Mobile Number':'9876543212',Password:'Pass@123'},
+      {Zone:'South',Designation:'area_manager',Name:'Ravi Kumar','Mail ID':'ravi.kumar@meesho.com','Mobile Number':'9876543213',Password:'Pass@123'},
+    ]
+  };
+}
+
+function populateKRAFilters() {
+  const chs = [...new Set(kraData.sheet2.map(r=>r['Cluster Head']).filter(Boolean))];
+  const ams = [...new Set([...kraData.sheet2.map(r=>r['Area Manager 1']), ...kraData.sheet2.map(r=>r['Area Manager 2']), ...kraData.sheet2.map(r=>r['Area Manager 3'])].filter(Boolean))];
+  const zones = [...new Set(kraData.sheet2.map(r=>r.Zone).filter(Boolean))];
+
+  ['kraClusterZone','kraClusterName','kraAMCluster'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id.includes('Zone')) el.innerHTML = `<option value="">All Zones</option>` + zones.map(z=>`<option>${z}</option>`).join('');
+    if (id === 'kraClusterName') el.innerHTML = `<option value="">All CHs</option>` + chs.map(c=>`<option>${c}</option>`).join('');
+    if (id === 'kraAMCluster') el.innerHTML = `<option value="">Select CH</option>` + chs.map(c=>`<option>${c}</option>`).join('');
+  });
+
+  const personSel = document.getElementById('kraScorePerson');
+  const designation = currentUser?.role;
+  let persons = [];
+  if (designation === 'regional_head' || designation === 'superadmin') persons = chs.concat(ams);
+  else if (designation === 'cluster_head') persons = ams;
+  personSel.innerHTML = `<option value="">Select Person</option>` + persons.map(p=>`<option>${p}</option>`).join('');
+}
+
+function renderKRAMyPerf() {
+  const body = document.getElementById('kraMyTableBody');
+  const scores = kraScores[currentUser?.email] || {};
+  let totalScore = 0, totalW = 0;
+  body.innerHTML = kraData.sheet1.map((r,i) => {
+    const score = scores[r.Sr_No] || 0;
+    totalScore += score * (r.Weightage/100);
+    totalW += r.Weightage||0;
+    return `<tr>
+      <td>${r.Sr_No}</td><td>${r.Category}</td><td>${r.Key_Responsibility}</td>
+      <td style="max-width:200px;white-space:normal">${r.KR_Description}</td>
+      <td>${r.Frequency}</td><td>${r.Weightage}%</td><td>${r.Metrics}</td>
+      <td><span class="badge ${score>=80?'badge-green':score>=60?'badge-yellow':'badge-red'}">${score||'-'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="text-center" style="padding:20px;color:var(--text-muted);">Load KRA data first</td></tr>';
+
+  document.getElementById('kraMyOverall').textContent = kraData.sheet1.length ? totalScore.toFixed(1) : '-';
+  document.getElementById('kraMyComplete').textContent = Object.keys(scores).length + '/' + kraData.sheet1.length;
+  document.getElementById('kraMyWeightage').textContent = totalW + '%';
+  document.getElementById('kraMyRank').textContent = '#1';
+}
+
+function loadKRAScoreSheet() {
+  const person = document.getElementById('kraScorePerson').value;
+  if (!person) { showToast('Select a person first','⚠️'); return; }
+  const body = document.getElementById('kraScoreBody');
+  const existingScores = kraScores[person] || {};
+  body.innerHTML = kraData.sheet1.map((r,i) => {
+    const maxScore = r.Weightage;
+    const current = existingScores[r.Sr_No] || '';
+    return `<tr>
+      <td>${r.Sr_No}</td><td>${r.Category}</td><td>${r.Key_Responsibility}</td>
+      <td>${r.Frequency}</td><td>${r.Weightage}%</td><td>${r.Metrics}</td>
+      <td class="kra-score-cell">
+        <input class="kra-score-input" type="number" min="0" max="${maxScore}" placeholder="0-${maxScore}" value="${current}" id="kraInput_${r.Sr_No}" onchange="validateKRAScore(this,${maxScore})"/>
+      </td>
+      <td><button class="btn-save-kra" onclick="saveKRAScore('${person}',${r.Sr_No})">SAVE</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="text-center" style="padding:20px;color:var(--text-muted);">No KRA data</td></tr>';
+}
+
+function validateKRAScore(input, max) {
+  if (parseFloat(input.value) > max) { input.value = max; showToast(`Max score is ${max}`,'⚠️'); }
+  if (parseFloat(input.value) < 0) input.value = 0;
+}
+
+function saveKRAScore(person, kraId) {
+  if (!kraScores[person]) kraScores[person] = {};
+  const val = document.getElementById(`kraInput_${kraId}`)?.value;
+  kraScores[person][kraId] = parseFloat(val) || 0;
+  localStorage.setItem('kraScores', JSON.stringify(kraScores));
+  showToast(`Score saved for ${person} — KRA #${kraId}`,'✅');
+}
+
+function saveAllKRAScores() {
+  const person = document.getElementById('kraScorePerson').value;
+  if (!person) { showToast('Select a person first','⚠️'); return; }
+  if (!kraScores[person]) kraScores[person] = {};
+  kraData.sheet1.forEach(r => {
+    const input = document.getElementById(`kraInput_${r.Sr_No}`);
+    if (input) kraScores[person][r.Sr_No] = parseFloat(input.value)||0;
+  });
+  localStorage.setItem('kraScores', JSON.stringify(kraScores));
+  showToast(`All scores saved for ${person}`,'✅');
+  renderClusterScores();
+  renderAMScores();
+}
+
+function renderClusterScores() {
+  const body = document.getElementById('kraClusterBody');
+  const chs = [...new Set(kraData.sheet2.map(r=>r['Cluster Head']).filter(Boolean))];
+  body.innerHTML = chs.map((ch,i) => {
+    const scores = kraScores[ch] || {};
+    const total = kraData.sheet1.reduce((a,r)=>{
+      return a + (scores[r.Sr_No]||0) * (r.Weightage/100);
+    },0);
+    return `<tr>
+      <td>${i+1}</td><td><b>${ch}</b></td>
+      <td>${kraData.sheet2.find(r=>r['Cluster Head']===ch)?.Zone||'-'}</td>
+      <td>${kraData.sheet2.find(r=>r['Cluster Head']===ch)?.['Regional Head']||'-'}</td>
+      <td><span class="badge ${total>=80?'badge-green':total>=60?'badge-yellow':'badge-red'}">${total.toFixed(1)}</span></td>
+      <td>100%</td><td>March 2025</td>
+      <td><span class="badge ${total>=80?'badge-green':total>=60?'badge-yellow':'badge-red'}">${total>=80?'Excellent':total>=60?'Good':'Needs Improvement'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="text-center" style="padding:20px;color:var(--text-muted);">No data</td></tr>';
+}
+
+function renderAMScores() {
+  const body = document.getElementById('kraAMBody');
+  const ch = document.getElementById('kraAMCluster')?.value;
+  const ams = kraData.sheet2.filter(r=>!ch||r['Cluster Head']===ch)
+    .flatMap(r=>[r['Area Manager 1'],r['Area Manager 2'],r['Area Manager 3']].filter(Boolean));
+  const unique = [...new Set(ams)];
+  body.innerHTML = unique.map((am,i) => {
+    const scores = kraScores[am] || {};
+    const total = kraData.sheet1.reduce((a,r)=>a+(scores[r.Sr_No]||0)*(r.Weightage/100),0);
+    const chRow = kraData.sheet2.find(r=>[r['Area Manager 1'],r['Area Manager 2'],r['Area Manager 3']].includes(am));
+    return `<tr>
+      <td>${i+1}</td><td><b>${am}</b></td>
+      <td>${chRow?.['Cluster Head']||'-'}</td><td>${chRow?.Zone||'-'}</td>
+      <td><span class="badge ${total>=80?'badge-green':total>=60?'badge-yellow':'badge-red'}">${total.toFixed(1)}</span></td>
+      <td>100%</td>
+      <td><span class="badge ${total>=80?'badge-green':total>=60?'badge-yellow':'badge-red'}">${total>=80?'Excellent':total>=60?'Good':'Needs Improvement'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="text-center" style="padding:20px;color:var(--text-muted);">No AM data</td></tr>';
+}
+
+function saveMapping() { showToast('Mapping configuration saved','✅'); }
+
+// ==================== COMPLIANCE ====================
+async function loadComplianceData() {
+  const repo = document.getElementById('compGhInput').value.trim();
+  setGhStatus('compGhDot','compGhRepo','loading', repo);
+  const buf = await fetchGithubFile(repo, 'comp.xlsx');
+  if (buf) {
+    const wb = XLSX.read(buf, {type:'array'});
+    complianceData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    setGhStatus('compGhDot','compGhRepo','ok', repo);
+    filterCompliance();
+    showToast(`Loaded ${complianceData.length} compliance records`,'✅');
+  } else {
+    complianceData = generateDemoCompliance();
+    setGhStatus('compGhDot','compGhRepo','ok', repo+' (demo)');
+    filterCompliance();
+    showToast('Demo compliance data loaded','⚠️');
+  }
+}
+
+function generateDemoCompliance() {
+  const facs = ['CTS','BLRS','HBS','HYDS','HGS1','BGS1','PNDS','IMS','DHS','CBTS'];
+  const types = ['Sort Centre','Hub','City Hub'];
+  const rhs = ['Vikrant Pandey','Arun Singh'];
+  const data = [];
+  for (let d=0;d<14;d++) {
+    const date = new Date(); date.setDate(date.getDate()-d);
+    facs.forEach(f => {
+      data.push({
+        date: date.toISOString().split('T')[0],
+        facility_1: f, RH: rhs[Math.floor(Math.random()*rhs.length)],
+        facility_Type: types[Math.floor(Math.random()*types.length)],
+        Volume: Math.floor(Math.random()*5000+500),
+        'Matured %': +(Math.random()*5+93).toFixed(1),
+        'Connection - D0+ 30Min': +(Math.random()*5+94).toFixed(1),
+        'bagging - D0+ 30Min': +(Math.random()*5+94).toFixed(1)
+      });
+    });
+  }
+  return data;
+}
+
+function parsePastedCompliance() {
+  const text = document.getElementById('compPasteArea').value.trim();
+  if (!text) { showToast('Paste some data first','⚠️'); return; }
+  const lines = text.split('\n').filter(l=>l.trim());
+  const headers = ['date','facility_1','RH','facility_Type','Volume','Matured %','Connection - D0+ 30Min','bagging - D0+ 30Min'];
+  const parsed = lines.map(line => {
+    const cols = line.split('\t');
+    const obj = {};
+    headers.forEach((h,i) => { obj[h] = cols[i]?.trim() || ''; });
+    return obj;
+  }).filter(r=>r.date && r.facility_1);
+  complianceData = [...complianceData, ...parsed];
+  filterCompliance();
+  showToast(`Parsed ${parsed.length} compliance rows`,'✅');
+}
+
+function clearCompliancePaste() { document.getElementById('compPasteArea').value = ''; }
+
+function filterCompliance() {
+  const facType = document.getElementById('compFacType')?.value;
+  const rh = document.getElementById('compRH')?.value;
+  let filtered = complianceData.filter(r =>
+    (!facType || r.facility_Type === facType) &&
+    (!rh || r.RH === rh)
+  );
+
+  // Populate dropdowns
+  const types = [...new Set(complianceData.map(r=>r.facility_Type).filter(Boolean))];
+  const rhs = [...new Set(complianceData.map(r=>r.RH).filter(Boolean))];
+  const facTypeEl = document.getElementById('compFacType');
+  if (facTypeEl && facTypeEl.options.length <= 1) {
+    facTypeEl.innerHTML = `<option value="">All Types</option>` + types.map(t=>`<option>${t}</option>`).join('');
+  }
+  const rhEl = document.getElementById('compRH');
+  if (rhEl && rhEl.options.length <= 1) {
+    rhEl.innerHTML = `<option value="">All RHs</option>` + rhs.map(r=>`<option>${r}</option>`).join('');
+  }
+
+  // KPIs
+  const avgConn = filtered.length ? (filtered.reduce((a,r)=>a+(parseFloat(r['Connection - D0+ 30Min'])||0),0)/filtered.length).toFixed(1) : '-';
+  const avgBag = filtered.length ? (filtered.reduce((a,r)=>a+(parseFloat(r['bagging - D0+ 30Min'])||0),0)/filtered.length).toFixed(1) : '-';
+  const b98Conn = filtered.filter(r=>parseFloat(r['Connection - D0+ 30Min'])<98).length;
+  const b98Bag = filtered.filter(r=>parseFloat(r['bagging - D0+ 30Min'])<98).length;
+  document.getElementById('compAvgConn').textContent = avgConn+'%';
+  document.getElementById('compAvgBag').textContent = avgBag+'%';
+  document.getElementById('compBelow98Conn').textContent = b98Conn;
+  document.getElementById('compBelow98Bag').textContent = b98Bag;
+
+  // Table
+  const body = document.getElementById('compBody');
+  const rcaList = document.getElementById('rcaList');
+  const rcaItems = [];
+  body.innerHTML = filtered.slice(0,200).map(r => {
+    const conn = parseFloat(r['Connection - D0+ 30Min'])||0;
+    const bag = parseFloat(r['bagging - D0+ 30Min'])||0;
+    const needsRCA = conn < 98 || bag < 98;
+    if (needsRCA) rcaItems.push(r);
+    const connBadge = conn<98?'badge-red':conn<99?'badge-yellow':'badge-green';
+    const bagBadge = bag<98?'badge-red':bag<99?'badge-yellow':'badge-green';
+    return `<tr>
+      <td>${r.date}</td><td><b>${r.facility_1}</b></td><td>${r.RH}</td>
+      <td>${r.facility_Type}</td><td>${formatNum(r.Volume)}</td>
+      <td>${r['Matured %']}%</td>
+      <td><span class="badge ${connBadge}">${conn}%</span></td>
+      <td><span class="badge ${bagBadge}">${bag}%</span></td>
+      <td><span class="badge ${needsRCA?'badge-red':'badge-green'}">${needsRCA?'⚠️ RCA Req':'✅ OK'}</span></td>
+      <td>${needsRCA?`<button class="btn-save-kra" onclick="openRCA('${r.facility_1}','${r.date}')">ADD RCA</button>`:'-'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="10" class="text-center" style="padding:20px;color:var(--text-muted);">No data</td></tr>';
+
+  // RCA list
+  rcaList.innerHTML = rcaItems.length ? rcaItems.map(r=>{
+    const key = r.facility_1+'_'+r.date;
+    const saved = JSON.parse(localStorage.getItem('rcas')||'{}')[key]||'';
+    return `<div class="rca-form" style="margin-bottom:12px;">
+      <div style="font-weight:600;font-size:14px;color:var(--accent-orange);margin-bottom:8px;">⚠️ ${r.facility_1} — ${r.date}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Conn: ${r['Connection - D0+ 30Min']}% | Bag: ${r['bagging - D0+ 30Min']}%</div>
+      <textarea class="callout-textarea" style="min-height:50px;" id="rca_${key}" placeholder="Enter RCA reason for failure...">${saved}</textarea>
+      <button class="btn-save-kra" style="margin-top:8px;" onclick="saveRCA('${key}')">SAVE RCA</button>
+    </div>`;
+  }).join('') : '<div class="empty-state"><div class="empty-icon">✅</div>All facilities above 98% threshold</div>';
+}
+
+function openRCA(fac, date) {
+  switchTab('comp','compRCA');
+  setTimeout(() => {
+    const key = fac+'_'+date;
+    const el = document.getElementById('rca_'+key);
+    if (el) el.focus();
+  }, 100);
+}
+
+function saveRCA(key) {
+  const el = document.getElementById('rca_'+key);
+  if (!el) return;
+  const rcas = JSON.parse(localStorage.getItem('rcas')||'{}');
+  rcas[key] = el.value;
+  localStorage.setItem('rcas', JSON.stringify(rcas));
+  showToast('RCA saved','✅');
+}
+
+function renderRanking() {
+  const rankBy = document.getElementById('rankBy')?.value || 'conn';
+  const fieldMap = {conn:'Connection - D0+ 30Min', bag:'bagging - D0+ 30Min'};
+  const byFac = {};
+  complianceData.forEach(r => {
+    const f = r.facility_1;
+    if (!f) return;
+    if (!byFac[f]) byFac[f] = {rh:r.RH,type:r.facility_Type,conn:[],bag:[]};
+    byFac[f].conn.push(parseFloat(r['Connection - D0+ 30Min'])||0);
+    byFac[f].bag.push(parseFloat(r['bagging - D0+ 30Min'])||0);
+  });
+  const avg = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1) : 0;
+  const ranked = Object.entries(byFac).map(([f,d])=>({
+    fac:f, rh:d.rh, type:d.type,
+    conn:parseFloat(avg(d.conn)), bag:parseFloat(avg(d.bag)),
+    overall:((parseFloat(avg(d.conn))+parseFloat(avg(d.bag)))/2).toFixed(1)
+  })).sort((a,b) => {
+    if (rankBy==='conn') return b.conn-a.conn;
+    if (rankBy==='bag') return b.bag-a.bag;
+    return b.overall-a.overall;
+  });
+  const body = document.getElementById('rankBody');
+  body.innerHTML = ranked.map((r,i) => `<tr>
+    <td><span class="badge ${i===0?'badge-yellow':i<3?'badge-blue':'badge-green'}">#${i+1}</span></td>
+    <td><b>${r.fac}</b></td><td>${r.rh}</td><td>${r.type}</td>
+    <td><span class="badge ${r.conn>=98?'badge-green':r.conn>=96?'badge-yellow':'badge-red'}">${r.conn}%</span></td>
+    <td><span class="badge ${r.bag>=98?'badge-green':r.bag>=96?'badge-yellow':'badge-red'}">${r.bag}%</span></td>
+    <td><b>${r.overall}%</b></td>
+    <td>${r.conn>98&&r.bag>98?'📈 Improving':'📉 Monitor'}</td>
+  </tr>`).join('');
+}
+
+// ==================== CALLOUTS ====================
+function saveCallout() {
+  const date = document.getElementById('coDate').value;
+  const loc = document.getElementById('coLocation').value;
+  const type = document.getElementById('coMeetingType').value;
+  const att = document.getElementById('coAttendees').value;
+  const disc = document.getElementById('coDiscussion').value;
+  if (!date || !loc || !disc) { showToast('Fill date, location and discussion','⚠️'); return; }
+  calloutData.push({
+    id: Date.now(), date, location:loc, meetingType:type,
+    attendees:att, discussion:disc, loggedBy:currentUser?.name||'User',
+    timestamp: new Date().toISOString()
+  });
+  localStorage.setItem('callouts', JSON.stringify(calloutData));
+  document.getElementById('coDate').value = '';
+  document.getElementById('coDiscussion').value = '';
+  renderCallouts();
+  showToast('Callout saved successfully','✅');
+}
+
+function filterCallouts() { renderCallouts(); }
+
+function renderCallouts() {
+  const fDate = document.getElementById('coFilterDate')?.value;
+  const fLoc = document.getElementById('coFilterLoc')?.value;
+  const fSearch = document.getElementById('coSearch')?.value.toLowerCase()||'';
+  const filtered = calloutData.filter(r =>
+    (!fDate || r.date === fDate) &&
+    (!fLoc || r.location === fLoc) &&
+    (!fSearch || JSON.stringify(r).toLowerCase().includes(fSearch))
+  ).reverse();
+  const body = document.getElementById('calloutBody');
+  const count = document.getElementById('calloutCount');
+  if (count) count.textContent = `(${filtered.length} records)`;
+  body.innerHTML = filtered.length ? filtered.map((r,i)=>`<tr>
+    <td>${i+1}</td><td>${r.date}</td>
+    <td><span class="badge badge-blue">${r.location}</span></td>
+    <td><span class="badge badge-yellow">${r.meetingType}</span></td>
+    <td style="max-width:150px;white-space:normal;font-size:11px">${r.attendees||'-'}</td>
+    <td style="max-width:300px;white-space:normal;font-size:12px">${r.discussion}</td>
+    <td>${r.loggedBy}</td>
+    <td><button class="btn-save-kra" style="color:var(--accent-red);border-color:rgba(255,51,102,0.3);" onclick="deleteCallout(${r.id})">DEL</button></td>
+  </tr>`).join('') : '<tr><td colspan="8" class="text-center" style="padding:30px;color:var(--text-muted);">No callouts found</td></tr>';
+}
+
+function deleteCallout(id) {
+  calloutData = calloutData.filter(r=>r.id!==id);
+  localStorage.setItem('callouts', JSON.stringify(calloutData));
+  renderCallouts();
+  showToast('Callout deleted','✅');
+}
+
+// ==================== SORT CODES ====================
+function renderSortCodes() {
+  filterSortCodes();
+  const zones = [...new Set(SORT_CODES.map(r=>r.zone))];
+  const zoneEl = document.getElementById('sortZone');
+  if (zoneEl) zoneEl.innerHTML = `<option value="">All Zones</option>` + zones.map(z=>`<option>${z}</option>`).join('');
+}
+
+function filterSortCodes() {
+  const search = document.getElementById('sortSearch')?.value.toLowerCase()||'';
+  const zone = document.getElementById('sortZone')?.value;
+  const type = document.getElementById('sortType')?.value;
+  const filtered = SORT_CODES.filter(r =>
+    (!search || r.code.toLowerCase().includes(search) || r.name.toLowerCase().includes(search) || r.city.toLowerCase().includes(search)) &&
+    (!zone || r.zone === zone) &&
+    (!type || r.type === type)
+  );
+  const body = document.getElementById('sortBody');
+  const cnt = document.getElementById('sortCodeCount');
+  if (cnt) cnt.textContent = `(${filtered.length} locations)`;
+  body.innerHTML = filtered.map((r,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><span class="badge badge-blue" style="font-family:'JetBrains Mono',monospace;letter-spacing:2px">${r.code}</span></td>
+    <td><b>${r.name}</b></td><td>${r.zone}</td>
+    <td><span class="badge ${r.type==='Hub'?'badge-orange':r.type==='City Hub'?'badge-yellow':'badge-blue'}">${r.type}</span></td>
+    <td>${r.city}</td><td>${r.state}</td>
+    <td><span class="badge badge-green">ACTIVE</span></td>
+  </tr>`).join('');
+}
+
+// ==================== TASK MANAGEMENT ====================
+function moveTask(card, target) {
+  const taskName = card.querySelector('.task-card-title').textContent;
+  const inboxList = document.getElementById('taskInboxList');
+  const inProgressList = document.getElementById('taskInProgressList');
+  const doneList = document.getElementById('taskDoneList');
+
+  if (target === 'inprogress') {
+    const timer = startTaskTimer(taskName);
+    card.querySelector('.task-timer-display').textContent = '⏱ 00:00';
+    card.querySelector('.task-timer-display').id = 'tt_' + timer.id;
+    card.onclick = () => moveTask(card, 'done');
+    const emptyState = inProgressList.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+    inProgressList.appendChild(card);
+    card.style.borderColor = 'rgba(255,215,0,0.4)';
+    updateTaskBadges();
+    showToast(`Task started: ${taskName}`,'⏱');
+  } else if (target === 'done') {
+    card.querySelector('.task-timer-display').textContent = '✅ Completed';
+    card.onclick = null;
+    const emptyState = doneList.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+    doneList.appendChild(card);
+    card.style.borderColor = 'rgba(0,255,157,0.4)';
+    updateTaskBadges();
+    showToast(`Task completed: ${taskName}`,'✅');
+  }
+}
+
+let timerCnt = 0;
+function startTaskTimer(name) {
+  const id = ++timerCnt;
+  const start = Date.now();
+  taskTimers[id] = setInterval(() => {
+    const el = document.getElementById('tt_' + id);
+    if (!el) { clearInterval(taskTimers[id]); return; }
+    const elapsed = Math.floor((Date.now()-start)/1000);
+    const m = String(Math.floor(elapsed/60)).padStart(2,'0');
+    const s = String(elapsed%60).padStart(2,'0');
+    el.textContent = `⏱ ${m}:${s}`;
+  }, 1000);
+  return {id};
+}
+
+function updateTaskBadges() {
+  const cols = ['taskInboxList','taskInProgressList','taskDoneList'];
+  const badges = document.querySelectorAll('.task-col-header .badge');
+  cols.forEach((id,i) => {
+    const cnt = document.getElementById(id).querySelectorAll('.task-card').length;
+    if (badges[i]) badges[i].textContent = cnt;
+  });
+}
+
+// ==================== CSV DOWNLOAD ====================
+function downloadCSV(tableId, filename) {
+  const table = document.getElementById(tableId);
+  if (!table) { showToast('Table not found','⛔'); return; }
+  let csv = '';
+  table.querySelectorAll('tr').forEach(row => {
+    const cells = [...row.querySelectorAll('th,td')].map(c => `"${c.textContent.replace(/"/g,'""')}"`);
+    csv += cells.join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Downloading ${filename}`,'⬇');
+}
+
+// ==================== UTILS ====================
+function formatNum(n) {
+  const num = parseFloat(n)||0;
+  if (num >= 100000) return (num/100000).toFixed(1)+'L';
+  if (num >= 1000) return (num/1000).toFixed(1)+'K';
+  return Math.round(num).toLocaleString('en-IN');
+}
+
+// ==================== INIT ====================
+// Initialize login clock on load
+updateLoginClock();
+</script>
+</body>
+</html>
