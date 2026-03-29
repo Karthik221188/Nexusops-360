@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Nexusops-360 | Operations Intelligence Platform</title>
+<title>Nexusops-360 v7 | Operations Intelligence Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;600&family=Exo+2:wght@200;400;600;800&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg-primary: #050b14;
@@ -145,7 +146,7 @@ body::before {
   border-radius:8px;
   padding:12px 16px;
   color:var(--text-primary);
-  font-family:'Exo 2',sans-serif;
+  font-family:sans-serif;
   font-size:14px;
   transition:all 0.3s;
   outline:none;
@@ -311,10 +312,10 @@ body::before {
 .features-grid {
   display:grid;
   grid-template-columns: repeat(4, 1fr);
-  gap:16px;
-  max-width:1200px;
-  width:90%;
-  padding:0 20px;
+  gap:14px;
+  max-width:1400px;
+  width:96%;
+  padding:0 16px;
 }
 .feature-card {
   background: var(--bg-card);
@@ -524,7 +525,7 @@ body::before {
   border-radius:6px;
   padding:8px 12px;
   color:var(--text-primary);
-  font-family:'Exo 2',sans-serif;
+  font-family:sans-serif;
   font-size:13px;
   outline:none;
   min-width:140px;
@@ -810,7 +811,7 @@ body::before {
   border-radius:6px;
   padding:10px 14px;
   color:var(--text-primary);
-  font-family:'Exo 2',sans-serif;
+  font-family:sans-serif;
   font-size:13px;
   outline:none;
   resize:vertical;
@@ -859,7 +860,7 @@ body::before {
   border-radius:5px;
   padding:8px;
   color:var(--text-primary);
-  font-family:'Exo 2',sans-serif;
+  font-family:sans-serif;
   font-size:12px;
   outline:none;
   resize:vertical;
@@ -1019,6 +1020,15 @@ body::before {
 @keyframes slideInRight { from{transform:translateX(100px);opacity:0} to{transform:translateX(0);opacity:1} }
 .notification.show { display:flex; align-items:center; gap:10px; }
 
+
+/* ===== V7 ADDITIONS ===== */
+.tab-content { display:none; }
+.tab-content.active { display:block !important; }
+#tab-taskBoard, #tab-myTasks, #tab-taskArchive, #tab-teamDir, #tab-taskAdmin {
+  animation: fadeSlideUp 0.3s ease;
+}
+.task-col-header { user-select:none; }
+.task-col-header:hover { color:var(--accent-cyan); }
 /* Feature card delay animations */
 .feature-card:nth-child(1){animation-delay:0.05s}
 .feature-card:nth-child(2){animation-delay:0.1s}
@@ -1365,6 +1375,62 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
 .liq-tab{padding:12px 15px;font-family:"Bebas Neue",sans-serif;font-size:.8rem;letter-spacing:.8px;color:#7e9ab8;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px}
 .liq-tab:hover{color:#eef2ff;background:rgba(255,255,255,.02)}.liq-tab.active{color:#e8423a;border-bottom-color:#e8423a}
 .liq-admin-tab{display:none}
+
+/* ── Multiselect Component ── */
+.ms-wrap{position:relative;min-width:130px;display:inline-block}
+.ms-btn{width:100%;background:var(--bg-card2,#0a1828);border:1px solid var(--border,rgba(0,200,255,.15));border-radius:7px;padding:7px 28px 7px 10px;color:var(--text-primary,#eef2ff);font-size:.75rem;cursor:pointer;text-align:left;position:relative;min-height:34px;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;transition:border .2s}
+.ms-btn:hover,.ms-btn.open{border-color:var(--accent-blue,#00c8ff)}
+.ms-btn::after{content:"\25BC";position:absolute;right:8px;font-size:.45rem;color:var(--text-muted,#4a6680)}
+.ms-btn.open::after{content:"\25B2"}
+.ms-cnt{background:var(--accent-blue,#00c8ff);color:#fff;border-radius:20px;font-size:.55rem;font-weight:900;padding:1px 5px;flex-shrink:0}
+.ms-dd{position:absolute;top:calc(100% + 3px);left:0;min-width:210px;z-index:3000;background:var(--bg-card,#0d1f35);border:1px solid rgba(0,200,255,.3);border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.7);display:none;flex-direction:column;max-height:260px}
+.ms-dd.open{display:flex}
+.ms-srch{padding:6px 8px;border-bottom:1px solid var(--border,rgba(0,200,255,.15));flex-shrink:0}
+.ms-srch input{width:100%;background:var(--bg-primary,#05080f);border:1px solid var(--border,rgba(0,200,255,.15));border-radius:5px;padding:4px 8px;color:var(--text-primary,#eef2ff);font-size:.71rem;outline:none}
+.ms-srch input:focus{border-color:var(--accent-blue,#00c8ff)}
+.ms-acts{display:flex;gap:4px;padding:4px 8px;border-bottom:1px solid var(--border,rgba(0,200,255,.15));flex-shrink:0}
+.ms-act{background:none;border:none;font-size:.62rem;font-weight:900;color:var(--accent-blue,#00c8ff);cursor:pointer;padding:2px 5px}
+.ms-act:hover{color:var(--text-primary,#eef2ff)}
+.ms-list{overflow-y:auto;flex:1}
+.ms-item{display:flex;align-items:flex-start;gap:7px;padding:6px 10px;cursor:pointer;font-size:.73rem;border-bottom:1px solid rgba(0,200,255,.05)}
+.ms-item:hover{background:rgba(0,200,255,.05)}.ms-item.sel{background:rgba(0,200,255,.08)}
+.ms-item input[type=checkbox]{accent-color:var(--accent-blue,#00c8ff);width:12px;height:12px;flex-shrink:0;cursor:pointer;margin-top:2px}
+.ms-item label{flex:1;cursor:pointer;line-height:1.3;word-break:break-word}
+
+
+/* ── Number & KPI Font Enhancement ── */
+.kpi-val, .stat-number, .big-number {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+.data-table td:is(:nth-child(5),:nth-child(6),:nth-child(7)),
+.data-table th:is(:nth-child(5),:nth-child(6),:nth-child(7)) {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .8rem;
+}
+/* KPI cards */
+[class*="kpi"] [class*="val"],
+[class*="stat"] [class*="val"],
+.metric-value, .count-value {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+/* Loss values in tables */
+.loss-val, .value-cell {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent-red, #ff3366);
+  font-weight: 600;
+}
+/* Score cells */
+.score-cell, .kra-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--accent-cyan, #00e5ff);
+}
+
 </style>
 </head>
 <body>
@@ -1423,24 +1489,17 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
     </div>
     <!-- Login type -->
     <div style="margin-bottom:14px;">
-      <div style="font-size:9px;color:#3d6480;letter-spacing:2px;font-family:'JetBrains Mono',monospace;margin-bottom:6px;">LOGIN WITH</div>
-      <select id="nexusLoginType" onchange="nexusToggleLoginType()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:8px;padding:10px 14px;color:#e8f4fd;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;cursor:pointer;">
-        <option value="email">Email ID</option>
-        <option value="mobile">Mobile Number</option>
-      </select>
-    </div>
-    <div style="margin-bottom:14px;">
-      <div style="font-size:9px;color:#3d6480;letter-spacing:2px;font-family:'JetBrains Mono',monospace;margin-bottom:6px;" id="nexusLoginLabel">EMAIL ADDRESS</div>
-      <input type="email" id="nexusLoginId" placeholder="superadmin@meesho.com" autocomplete="off" onkeydown="if(event.key==='Enter')nexusDoLogin()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:8px;padding:12px 14px;color:#e8f4fd;font-family:'Exo 2',sans-serif;font-size:14px;outline:none;"/>
+      <div style="font-size:9px;color:#3d6480;letter-spacing:2px;font-family:'JetBrains Mono',monospace;margin-bottom:6px;">MOBILE NUMBER</div>
+      <input type="tel" id="nexusLoginId" maxlength="10" placeholder="9999999999" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('nexusLoginPwd').focus()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:8px;padding:12px 14px;color:#e8f4fd;font-family:sans-serif;font-size:14px;outline:none;letter-spacing:2px;"/>
     </div>
     <div style="margin-bottom:16px;">
       <div style="font-size:9px;color:#3d6480;letter-spacing:2px;font-family:'JetBrains Mono',monospace;margin-bottom:6px;">PASSWORD</div>
-      <input type="password" id="nexusLoginPwd" placeholder="Admin@2026" onkeydown="if(event.key==='Enter')nexusDoLogin()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:8px;padding:12px 14px;color:#e8f4fd;font-family:'Exo 2',sans-serif;font-size:14px;outline:none;"/>
+      <input type="password" id="nexusLoginPwd" placeholder="Admin@2026" onkeydown="if(event.key==='Enter')nexusDoLogin()" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,200,255,0.15);border-radius:8px;padding:12px 14px;color:#e8f4fd;font-family:sans-serif;font-size:14px;outline:none;"/>
     </div>
     <button onclick="nexusDoLogin()" style="width:100%;padding:13px;background:linear-gradient(135deg,#0066cc,#00c8ff);border:none;border-radius:8px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all 0.3s;">⚡ AUTHENTICATE &amp; ENTER</button>
     <div id="nexusLoginErr" style="display:none;color:#ff3366;font-size:11px;text-align:center;margin-top:10px;padding:7px;background:rgba(255,51,102,0.08);border-radius:6px;font-family:'JetBrains Mono',monospace;">⛔ Invalid credentials.</div>
     <div style="margin-top:14px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:#3d6480;line-height:1.8;">
-      EMAIL: superadmin@meesho.com &nbsp;|&nbsp; MOBILE: 9999999999 &nbsp;|&nbsp; PWD: Admin@2026
+      MOBILE: 9999999999 &nbsp;|&nbsp; PASSWORD: Admin@2026
     </div>
   </div>
 </div>
@@ -1452,8 +1511,15 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <div class="nav-badge" id="navDateTime" style="font-family:'JetBrains Mono',monospace;font-size:11px;">--</div>
     </div>
     <div class="nav-right">
-      <div class="session-timer"><div class="session-dot"></div>SESSION: <span id="sessionTimer">00:00:00</span></div>
-      <div class="nav-user">
+      <button onclick="nexusToggleNotif()" style="position:relative;background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.25);border-radius:8px;padding:6px 12px;color:#00c8ff;font-size:1rem;cursor:pointer;transition:background .2s" title="Notifications">
+        🔔<span id="nexusNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ff3366;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.58rem;font-weight:900;line-height:16px;text-align:center">0</span>
+      </button>
+      <div class="session-timer" style="cursor:pointer;" onclick="showSessionInfo()" title="Click for session info">
+        <div class="session-dot"></div>SESSION: <span id="sessionTimer">00:00:00</span>
+      </div>
+      <div id="navLoginTimeBadge" style="display:none;background:rgba(0,255,213,0.06);border:1px solid rgba(0,255,213,0.2);border-radius:6px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent-cyan);white-space:nowrap;"></div>
+      <button id="loginLogBtn" onclick="showLoginLog()" style="display:none;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:6px;padding:7px 14px;color:var(--accent-yellow);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:1px;">🔐 LOGIN LOG</button>
+      <div class="nav-user" style="cursor:pointer;" onclick="showSessionInfo()" title="Session info">
         <div class="user-info">
           <div class="user-name" id="navUserName">--</div>
           <div class="user-role" id="navUserRole">--</div>
@@ -1473,8 +1539,8 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <div class="feature-card" onclick="openSection('empMgmt')"><span class="feature-icon">👥</span><div class="feature-label">A. Employee Management</div><div class="feature-desc">Daily task tracking &amp; time recording</div></div>
       <div class="feature-card" onclick="openSection('kraDash')"><span class="feature-icon">🎯</span><div class="feature-label">B. Operation - KRA</div><div class="feature-desc">KRA scoring &amp; performance ratings</div></div>
       <div class="feature-card" onclick="openSection('lossDash')"><span class="feature-icon">📉</span><div class="feature-label">C. Loss Dashboard</div><div class="feature-desc">LossIQ v10 · Full Loss Analytics Platform</div></div>
-      <div class="feature-card dev-mode" onclick="showDevModal('D. Escalation Matrix')"><span class="feature-icon">📋</span><div class="feature-label">D. Escalation Matrix</div><div class="feature-desc">Issue escalation &amp; SLA tracking</div><div class="dev-badge">UNDER DEVELOPMENT</div></div>
-      <div class="feature-card dev-mode" onclick="showDevModal('E. Node Level Compliance')"><span class="feature-icon">🔗</span><div class="feature-label">E. Node Level Compliance</div><div class="feature-desc">Node-wise compliance monitoring</div><div class="dev-badge">UNDER DEVELOPMENT</div></div>
+      <div class="feature-card" onclick="openSection('escalationMatrix')"><span class="feature-icon">📋</span><div class="feature-label">D. Escalation Matrix</div><div class="feature-desc">Issue escalation &amp; SLA tracking</div></div>
+      <div class="feature-card" onclick="openSection('complianceSection')"><span class="feature-icon">🔗</span><div class="feature-label">E. Node Level Compliance</div><div class="feature-desc">Node compliance & D0+ 30Min tracking</div></div>
       <div class="feature-card dev-mode" onclick="showDevModal('F. Pendency Trend')"><span class="feature-icon">📈</span><div class="feature-label">F. Pendency Trend</div><div class="feature-desc">Pendency analysis &amp; trend graphs</div><div class="dev-badge">UNDER DEVELOPMENT</div></div>
       <div class="feature-card dev-mode" onclick="showDevModal('G. NLH Fleet')"><span class="feature-icon">🚚</span><div class="feature-label">G. NLH Fleet</div><div class="feature-desc">Fleet management &amp; tracking</div><div class="dev-badge">UNDER DEVELOPMENT</div></div>
       <div class="feature-card dev-mode" onclick="showDevModal('H. RLH')"><span class="feature-icon">🏭</span><div class="feature-label">H. RLH</div><div class="feature-desc">Regional last-mile hub operations</div><div class="dev-badge">UNDER DEVELOPMENT</div></div>
@@ -1492,8 +1558,10 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
         <div class="section-title">👥 Employee Management · Task Inbox</div>
       </div>
       <div class="flex gap-12">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent-cyan);padding:8px 14px;background:rgba(0,255,213,0.06);border:1px solid rgba(0,255,213,0.2);border-radius:6px;">
-          Login time recorded: <span id="empLoginTime">--:--:--</span>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent-cyan);padding:8px 14px;background:rgba(0,255,213,0.06);border:1px solid rgba(0,255,213,0.2);border-radius:6px;line-height:1.8;">
+          <div>🕐 Login: <span id="empLoginTime" style="font-weight:700;">--:--:--</span></div>
+          <div style="font-size:10px;color:var(--text-muted);">Date: <span id="empLoginDate">--</span></div>
+          <div>⏱ Session: <span id="empSessionDisplay" style="color:var(--accent-green);">00:00:00</span></div>
         </div>
         <button class="btn-back" onclick="goHome()">← HOME</button>
       </div>
@@ -1529,11 +1597,49 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
         </div>
       </div>
 
+      <!-- Task Tabs -->
+      <div class="tab-nav" style="margin-bottom:20px;">
+        <button class="tab-btn active" onclick="switchEmpTab('taskBoard')">📋 TASK BOARD</button>
+        <button class="tab-btn" onclick="switchEmpTab('myTasks')">👤 MY TASKS</button>
+        <button class="tab-btn" onclick="switchEmpTab('taskArchive')">🗂 TASK ARCHIVE</button>
+        <button class="tab-btn" onclick="switchEmpTab('teamDir')">👥 TEAM DIRECTORY</button>
+        <button class="tab-btn" id="adminTaskBtn" style="display:none;" onclick="switchEmpTab('taskAdmin')">⚙️ ADMIN · CREATE TASK</button>
+      </div>
+
+      <!-- Task Board Tab -->
+      <div id="tab-taskBoard" class="tab-content active">
+      <!-- Task KPI Dashboard -->
+      <div id="taskKPIBar" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:18px;padding:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;">
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent-cyan)" id="kpiTotalUsers">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;margin-top:3px">TOTAL USERS</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent-green)" id="kpiLoggedToday">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;margin-top:3px">LOGGED IN TODAY</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent-blue)" id="kpiActiveTasks">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;margin-top:3px">ACTIVE TASKS</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent-yellow)" id="kpiInProgress">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;margin-top:3px">IN PROGRESS</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent-green)" id="kpiCompleted">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;margin-top:3px">COMPLETED</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent-orange)" id="kpiReassigned">0</div>
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:1px;margin-top:3px">REASSIGNED</div>
+        </div>
+      </div>
       <div class="task-inbox" id="taskInbox">
         <div class="task-col">
-          <div class="task-col-header">
+          <div class="task-col-header" style="cursor:pointer" onclick="showTaskListDetail('taskInboxList','INBOX')">
             📥 INBOX
-            <span class="badge badge-blue">4</span>
+            <span class="badge badge-blue" id="badgeInbox">4</span>
           </div>
           <div id="taskInboxList">
             <div class="task-card" onclick="moveTask(this,'inprogress')">
@@ -1559,9 +1665,9 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
           </div>
         </div>
         <div class="task-col">
-          <div class="task-col-header">
+          <div class="task-col-header" style="cursor:pointer" onclick="showTaskListDetail('taskInProgressList','IN PROGRESS')">
             🔄 IN PROGRESS
-            <span class="badge badge-yellow">0</span>
+            <span class="badge badge-yellow" id="badgeInProgress">0</span>
           </div>
           <div id="taskInProgressList">
             <div class="empty-state" style="padding:30px 10px;">
@@ -1570,15 +1676,134 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
           </div>
         </div>
         <div class="task-col">
-          <div class="task-col-header">
+          <div class="task-col-header" style="cursor:pointer" onclick="showTaskListDetail('taskDoneList','COMPLETED')">
             ✅ COMPLETED
-            <span class="badge badge-green">0</span>
+            <span class="badge badge-green" id="badgeDone">0</span>
           </div>
           <div id="taskDoneList">
             <div class="empty-state" style="padding:30px 10px;">
               <div>Completed tasks<br>appear here</div>
             </div>
           </div>
+        </div>
+      </div>
+      </div><!-- /tab-taskBoard -->
+
+      <!-- MY TASKS Tab -->
+      <div id="tab-myTasks" class="tab-content">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--accent-cyan);margin-bottom:12px;">👤 MY ASSIGNED TASKS</div>
+          <div id="myTasksList" style="display:grid;gap:12px;">
+            <div class="empty-state"><div class="empty-icon">📋</div><div>No tasks assigned to you yet</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARCHIVE Tab -->
+      <div id="tab-taskArchive" class="tab-content">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">ZONE</div>
+            <select class="filter-select" id="archZone" onchange="renderTaskArchive()"><option value="">All Zones</option><option>South</option><option>North</option><option>East</option><option>West</option></select></div>
+          <div class="filter-group"><div class="filter-label">STATUS</div>
+            <select class="filter-select" id="archStatus" onchange="renderTaskArchive()">
+              <option value="">All Status</option><option>Inbox</option><option>In Progress</option><option>Completed</option>
+            </select></div>
+          <div class="filter-group" style="flex:1"><div class="filter-label">SEARCH</div>
+            <input class="filter-input" id="archSearch" placeholder="Search tasks..." oninput="renderTaskArchive()" style="width:100%"/></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">🗂 Completed Task Archive <span class="table-count" id="archCount">(0)</span></div>
+          <button class="btn-download" onclick="downloadCSV('archTable','task_archive.csv')">⬇ EXPORT</button></div>
+          <div style="overflow-x:auto"><table class="data-table" id="archTable">
+            <thead><tr><th>#</th><th>TASK</th><th>ASSIGNED TO</th><th>ZONE</th><th>PRIORITY</th><th>CREATED</th><th>COMPLETED</th><th>STATUS</th></tr></thead>
+            <tbody id="archBody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">No archived tasks</td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- TEAM DIRECTORY Tab -->
+      <div id="tab-teamDir" class="tab-content">
+        <div class="filters-row">
+          <div class="filter-group"><div class="filter-label">ZONE</div>
+            <select class="filter-select" id="tdZone" onchange="renderTeamDirectory()">
+              <option value="">All Zones</option><option>South</option><option>North</option><option>East</option><option>West</option></select></div>
+          <div class="filter-group"><div class="filter-label">ROLE</div>
+            <select class="filter-select" id="tdRole" onchange="renderTeamDirectory()">
+              <option value="">All Roles</option>
+              <option value="superadmin">Super Admin</option>
+              <option value="regional_head">Regional Head</option>
+              <option value="cluster_head">Cluster Head</option>
+              <option value="area_manager">Area Manager</option></select></div>
+          <div class="filter-group" style="flex:1"><div class="filter-label">SEARCH</div>
+            <input class="filter-input" id="tdSearch" placeholder="Name, email, mobile..." oninput="renderTeamDirectory()" style="width:100%"/></div>
+          <button id="tdAddBtn" style="display:none;" class="btn-submit" onclick="showAddMemberForm()">➕ ADD MEMBER</button>
+        </div>
+        <div id="addMemberForm" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--accent-cyan);margin-bottom:14px;">➕ ADD TEAM MEMBER</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;">
+            <div class="filter-group"><div class="filter-label">NAME</div><input class="filter-input" id="tdNewName" placeholder="Full name" style="width:100%"/></div>
+            <div class="filter-group"><div class="filter-label">EMAIL</div><input class="filter-input" id="tdNewEmail" placeholder="email@meesho.com" style="width:100%"/></div>
+            <div class="filter-group"><div class="filter-label">MOBILE</div><input class="filter-input" id="tdNewMobile" placeholder="10-digit" style="width:100%" maxlength="10"/></div>
+            <div class="filter-group"><div class="filter-label">ROLE</div>
+              <select class="filter-select" id="tdNewRole" style="width:100%">
+                <option value="area_manager">Area Manager</option>
+                <option value="cluster_head">Cluster Head</option>
+                <option value="regional_head">Regional Head</option>
+              </select></div>
+            <div class="filter-group"><div class="filter-label">ZONE</div>
+              <select class="filter-select" id="tdNewZone" style="width:100%">
+                <option>South</option><option>North</option><option>East</option><option>West</option>
+              </select></div>
+            <div class="filter-group"><div class="filter-label">PASSWORD</div><input class="filter-input" id="tdNewPwd" placeholder="Pass@123" style="width:100%"/></div>
+          </div>
+          <button class="btn-submit" onclick="addTeamMember()">💾 SAVE MEMBER</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head-row"><div class="table-title">👥 Team Directory <span class="table-count" id="tdCount">(loading...)</span></div></div>
+          <div style="overflow-x:auto"><table class="data-table" id="tdTable">
+            <thead><tr><th>#</th><th>NAME</th><th>DESIGNATION</th><th>ZONE</th><th>EMAIL</th><th>MOBILE</th><th>STATUS</th><th>ACTION</th></tr></thead>
+            <tbody id="tdBody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Loading...</td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: Create Task Tab -->
+      <div id="tab-taskAdmin" class="tab-content">
+        <div style="background:var(--bg-card);border:1px solid rgba(0,200,255,0.25);border-radius:12px;padding:20px;margin-bottom:16px;">
+          <div style="font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--accent-cyan);margin-bottom:14px;">⚙️ ADMIN · TASK MANAGEMENT</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px;">
+            <div class="filter-group"><div class="filter-label">TASK TITLE</div><input class="filter-input" id="adminTaskTitle" placeholder="Enter task title..." style="width:100%"/></div>
+            <div class="filter-group"><div class="filter-label">ASSIGN TO (multi-select)</div>
+              <div id="adminTaskAssignee" class="ms-wrap" style="width:100%"></div></div>
+            <div class="filter-group"><div class="filter-label">PRIORITY</div>
+              <select class="filter-select" id="adminTaskPriority">
+                <option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></div>
+            <div class="filter-group"><div class="filter-label">DUE DATE & TIME</div>
+              <input type="datetime-local" class="filter-input" id="adminTaskDue" style="width:100%"/></div>
+            <div class="filter-group"><div class="filter-label">ZONE</div>
+              <select class="filter-select" id="adminTaskZone">
+                <option>South</option><option>North</option><option>East</option><option>West</option><option>All</option></select></div>
+            <div class="filter-group"><div class="filter-label">LOCATION</div>
+              <select class="filter-select" id="adminTaskLoc" style="width:100%">
+                <option value="">All/General</option>
+              </select></div>
+          </div>
+          <div class="filter-group" style="margin-bottom:12px;">
+            <div class="filter-label">DESCRIPTION</div>
+            <textarea style="width:100%;min-height:80px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text-primary);font-family:sans-serif;font-size:13px;outline:none;resize:vertical;" id="adminTaskDesc" placeholder="Task description..."></textarea>
+          </div>
+          <button class="btn-submit" onclick="createNewTask()">💾 CREATE & ASSIGN TASK</button>
+        </div>
+        <!-- All Tasks table for admin -->
+        <div class="table-wrap">
+          <div class="table-head-row">
+            <div class="table-title">📋 All Tasks <span class="table-count" id="adminTaskCount">(0)</span></div>
+            <button class="btn-download" onclick="downloadCSV('adminTaskTable','all_tasks.csv')">⬇ EXPORT</button>
+          </div>
+          <div style="overflow-x:auto"><table class="data-table" id="adminTaskTable">
+            <thead><tr><th>#</th><th>TASK</th><th>ASSIGNED TO</th><th>ZONE</th><th>PRIORITY</th><th>DUE</th><th>STATUS</th><th>REPLIES</th><th>ACTION</th></tr></thead>
+            <tbody id="adminTaskBody"><tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted);">No tasks created yet</td></tr></tbody>
+          </table></div>
         </div>
       </div>
 
@@ -1621,11 +1846,11 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       </div>
 
       <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('kra','kraMyPerf')">📊 MY PERFORMANCE</button>
-        <button class="tab-btn" onclick="switchTab('kra','kraScore')">✏️ SCORE KRA</button>
-        <button class="tab-btn" onclick="switchTab('kra','kraCluster')">🏢 CLUSTER SCORES</button>
-        <button class="tab-btn" onclick="switchTab('kra','kraAM')">👤 AREA MANAGER SCORES</button>
-        <button class="tab-btn" onclick="switchTab('kra','kraSuperAdmin')">⚙️ SUPER ADMIN</button>
+        <button class="tab-btn active" onclick="switchTab('kra','kraMyPerf');this.parentElement.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')">📊 MY PERFORMANCE</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraScore');this.parentElement.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')">✏️ SCORE KRA</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraCluster');this.parentElement.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')">🏢 CLUSTER SCORES</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraAM');this.parentElement.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')">👤 AREA MANAGER SCORES</button>
+        <button class="tab-btn" onclick="switchTab('kra','kraSuperAdmin');this.parentElement.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')">⚙️ SUPER ADMIN</button>
       </div>
 
       <!-- My Performance Tab -->
@@ -1634,7 +1859,7 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
           <div class="filter-group">
             <div class="filter-label">YEAR</div>
             <select class="filter-select" id="kraYear" onchange="renderKRAMyPerf()">
-              <option>2025</option><option>2024</option>
+              <option>2026</option><option>2027</option>
             </select>
           </div>
           <div class="filter-group">
@@ -1651,7 +1876,8 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
             <div class="filter-label">WEEK</div>
             <select class="filter-select" id="kraWeek" onchange="renderKRAMyPerf()">
               <option value="">All Weeks</option>
-              <script>for(let i=1;i<=52;i++)document.write(`<option>Week ${i}</option>`);</script>
+              <option>Week 1</option><option>Week 2</option><option>Week 3</option><option>Week 4</option><option>Week 5</option><option>Week 6</option><option>Week 7</option><option>Week 8</option><option>Week 9</option><option>Week 10</option><option>Week 11</option><option>Week 12</option><option>Week 13</option><option>Week 14</option><option>Week 15</option><option>Week 16</option><option>Week 17</option><option>Week 18</option><option>Week 19</option><option>Week 20</option><option>Week 21</option><option>Week 22</option><option>Week 23</option><option>Week 24</option><option>Week 25</option><option>Week 26</option><option>Week 27</option><option>Week 28</option><option>Week 29</option><option>Week 30</option><option>Week 31</option><option>Week 32</option><option>Week 33</option><option>Week 34</option><option>Week 35</option><option>Week 36</option><option>Week 37</option><option>Week 38</option><option>Week 39</option><option>Week 40</option><option>Week 41</option><option>Week 42</option><option>Week 43</option><option>Week 44</option><option>Week 45</option><option>Week 46</option><option>Week 47</option><option>Week 48</option><option>Week 49</option><option>Week 50</option><option>Week 51</option><option>Week 52</option>
+              
             </select>
           </div>
         </div>
@@ -1711,7 +1937,19 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
             <select class="filter-select" id="kraScoreWeek"><option value="">All Weeks</option></select>
           </div>
           <div class="filter-group">
-            <div class="filter-label">CLUSTER HEAD / AM NAME</div>
+            <div class="filter-label">ZONE</div>
+            <select class="filter-select" id="kraScoreZone" onchange="nexusKraFilterCascade()">
+              <option value="">All Zones</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">CLUSTER HEAD</div>
+            <select class="filter-select" id="kraScoreCH" onchange="nexusKraFilterCascade()">
+              <option value="">All CHs</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <div class="filter-label">AREA MANAGER / PERSON</div>
             <select class="filter-select" id="kraScorePerson">
               <option value="">Select Person</option>
             </select>
@@ -1747,7 +1985,7 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
           </div>
           <div class="filter-group">
             <div class="filter-label">MONTH</div>
-            <select class="filter-select"><option>March 2025</option><option>Feb 2025</option></select>
+            <select class="filter-select"><option>March 2026</option><option>Feb 2026</option></select>
           </div>
           <button class="btn-filter" onclick="renderClusterScores()">FILTER</button>
           <button class="btn-download" onclick="downloadCSV('kraClusterTable','cluster_scores.csv')">⬇ EXPORT</button>
@@ -1773,7 +2011,7 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
           <div class="filter-group"><div class="filter-label">AREA MANAGER</div>
             <select class="filter-select" id="kraAMName"><option value="">All AMs</option></select></div>
           <div class="filter-group"><div class="filter-label">MONTH</div>
-            <select class="filter-select"><option>March 2025</option></select></div>
+            <select class="filter-select"><option>March 2026</option></select></div>
           <button class="btn-filter" onclick="renderAMScores()">FILTER</button>
           <button class="btn-download" onclick="downloadCSV('kraAMTable','am_scores.csv')">⬇ EXPORT</button>
         </div>
@@ -1793,17 +2031,32 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <!-- Super Admin Tab -->
       <div class="tab-content" id="kraSuperAdmin">
         <div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:20px;margin-bottom:20px;">
-          <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--accent-yellow);margin-bottom:12px;">⚙️ SUPER ADMIN · Mapping Configuration</div>
-          <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
-            Map Regional Heads → Cluster Heads → Area Managers. Only accessible to Super Admin & Regional Managers.
-            Mapping determines who can score whom. Upload KRA Excel with Sheet3 to auto-populate login credentials.
+          <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--accent-yellow);margin-bottom:12px;">⚙️ SUPER ADMIN · KRA & Mapping Configuration</div>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:16px;">
+            Map Regional Heads → Cluster Heads → Area Managers. Set KRA item weightage. Only Super Admin can configure these settings.
           </p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn-submit" onclick="openKRAWeightageEditor()" style="background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,215,0,0.1));border:1px solid rgba(255,215,0,0.4);color:var(--accent-yellow);">✏️ EDIT KRA WEIGHTAGE (10 Items)</button>
+            <button class="btn-submit" onclick="exportKRAConfig()" style="background:rgba(0,255,157,0.08);border:1px solid rgba(0,255,157,0.25);color:var(--accent-green);">⬇ EXPORT KRA CONFIG</button>
+          </div>
         </div>
         <div class="charts-grid cols-2">
           <div class="table-wrap">
             <div class="table-head-row"><div class="table-title">🔗 RH → CH Mapping</div>
               <button class="btn-submit" style="padding:6px 14px;font-size:12px;" onclick="saveMapping()">SAVE MAPPING</button></div>
-            <div style="overflow-x:auto">
+            <div style="margin-bottom:12px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.15);border-radius:8px;padding:14px">
+                <div style="font-size:.78rem;font-weight:700;color:var(--accent-cyan);margin-bottom:10px;letter-spacing:1px">&#43; ADD RH &#8594; CH MAPPING <span style="font-size:.65rem;color:var(--text-muted)">(1 RH → multiple CHs supported)</span></div>
+                <div style="display:grid;grid-template-columns:1fr 2fr 1fr auto;gap:8px;align-items:flex-end">
+                  <div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">REGIONAL HEAD *</div>
+                    <input id="newRH" class="filter-input" placeholder="RH full name" style="width:100%"/></div>
+                  <div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">CLUSTER HEAD(S) — comma-separated for multiple</div>
+                    <input id="newCH" class="filter-input" placeholder="CH1, CH2, CH3 ..." style="width:100%"/></div>
+                  <div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">ZONE</div>
+                    <input id="newZone" class="filter-input" placeholder="Zone" style="width:100%"/></div>
+                  <button class="btn-filter" onclick="addMappingRow('rh_ch')" style="padding:8px 14px;height:36px">&#43; ADD</button>
+                </div>
+              </div>
+              <div style="overflow-x:auto">
               <table class="data-table" id="mappingRHCH">
                 <thead><tr><th>REGIONAL HEAD</th><th>CLUSTER HEAD</th><th>ZONE</th><th>STATUS</th></tr></thead>
                 <tbody id="mappingRHCHBody">
@@ -1815,6 +2068,16 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
           <div class="table-wrap">
             <div class="table-head-row"><div class="table-title">🔗 CH → AM Mapping</div></div>
             <div style="overflow-x:auto">
+              <div style="margin-bottom:12px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.15);border-radius:8px;padding:14px">
+                <div style="font-size:.78rem;font-weight:700;color:var(--accent-cyan);margin-bottom:10px;letter-spacing:1px">&#43; ADD CH &#8594; AM MAPPING <span style="font-size:.65rem;color:var(--text-muted)">(1 CH → multiple AMs supported)</span></div>
+                <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:8px;align-items:flex-end">
+                  <div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">CLUSTER HEAD *</div>
+                    <input id="newCH2" class="filter-input" placeholder="CH full name" style="width:100%"/></div>
+                  <div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">AREA MANAGER(S) — comma-separated for multiple</div>
+                    <input id="newAM" class="filter-input" placeholder="AM1, AM2, AM3 ..." style="width:100%"/></div>
+                  <button class="btn-filter" onclick="addMappingRow('ch_am')" style="padding:8px 14px;height:36px">&#43; ADD</button>
+                </div>
+              </div>
               <table class="data-table" id="mappingCHAM">
                 <thead><tr><th>CLUSTER HEAD</th><th>AREA MANAGER 1</th><th>AM 2</th><th>AM 3</th></tr></thead>
                 <tbody id="mappingCHAMBody">
@@ -1851,36 +2114,9 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
     </div>
     <div class="content" style="max-width:100%;padding:16px 18px;">
 
-  <div class="topbar">
-    <div>
-      <div class="tlogo">Loss<span>IQ</span></div>
-      <div class="tlogo-sub">Shipment Loss Intelligence</div>
-    </div>
-    <div class="tright">
-      <div class="upill" onclick="openPwdModal()">
-        <div class="uavatar" id="uavatar">SA</div>
-        <div>
-          <div class="uname" id="uname">Super Admin</div>
-          <div class="urole" id="urole">Super Admin</div>
-        </div>
-      </div>
-      <button class="ibtn blue" onclick="openPwdModal()">🔒 Password</button>
-      <button class="ibtn" id="cloudStatusBtn" onclick="showCloudConfig()" title="Cloud Sync Status">☁️ Cloud</button>
-      <button class="ibtn" onclick="doLogout()">⏻ Logout</button>
-    </div>
-  </div>
+  
 
-  <div class="tabs" id="mainTabs">
-    <div class="tab active" data-tab="dashboard" onclick=\"liqTab('dashboard')">📊 Dashboard</div>
-    <div class="tab" data-tab="summary" onclick=\"liqTab('summary')">📋 Month Summary</div>
-    <div class="tab" data-tab="ranking" onclick=\"liqTab('ranking')">🏆 Rankings</div>
-    <div class="tab" data-tab="rca" onclick=\"liqTab('rca')">📝 RCA Update</div>
-    <div class="tab" data-tab="reattribution" onclick=\"liqTab('reattribution')">🔄 Reattribution</div>
-    <div class="tab" data-tab="performance" onclick=\"liqTab('performance')">📈 CH Performance</div>
-    <div class="tab admin-tab" data-tab="locations" onclick=\"liqTab('locations')">📍 Locations</div>
-    <div class="tab admin-tab" data-tab="admin" onclick=\"liqTab('admin')">⚙️ Admin</div>
-    <div class="tab admin-tab" data-tab="data" onclick=\"liqTab('data')">📤 Data Upload</div>
-  </div>
+  
 
   <div class="content">
 
@@ -1889,13 +2125,13 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <div class="fbar">
         <div class="fbar-title">🔽 Dashboard Filters</div>
         <div class="frow">
-          <div class="fg"><div class="flabel">Month</div><select class="fsel" id="fMonth" onchange="applyFilters()"><option value="">All Months</option></select></div>
-          <div class="fg"><div class="flabel">Zone</div><select class="fsel" id="fZone" onchange="applyFilters()"><option value="">All Zones</option></select></div>
-          <div class="fg"><div class="flabel">Regional Head</div><select class="fsel" id="fRH" onchange="applyFilters()"><option value="">All</option></select></div>
-          <div class="fg"><div class="flabel">Cluster Head</div><select class="fsel" id="fCH" onchange="applyFilters()"><option value="">All</option></select></div>
-          <div class="fg"><div class="flabel">Location</div><select class="fsel" id="fLoc" onchange="applyFilters()"><option value="">All</option></select></div>
+          <div class="fg"><div class="flabel">Month</div><div class="ms-wrap fsel" id="fMonth" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Zone</div><div class="ms-wrap fsel" id="fZone" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Regional Head</div><div class="ms-wrap fsel" id="fRH" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Cluster Head</div><div class="ms-wrap fsel" id="fCH" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Location</div><div class="ms-wrap fsel" id="fLoc" style="min-width:130px"></div></div>
           <div class="fg"><div class="flabel">Movement</div><select class="fsel" id="fMov" onchange="applyFilters()"><option value="">All Types</option><option value="Forward">Forward</option><option value="RTO">RTO</option></select></div>
-          <div class="fg"><div class="flabel">Reason L1</div><select class="fsel" id="fR1" onchange="applyFilters()"><option value="">All Reasons</option></select></div>
+          <div class="fg"><div class="flabel">Reason L1</div><div class="ms-wrap fsel" id="fR1" style="min-width:130px"></div></div>
           <div class="fg"><div class="flabel">Attribution Changed</div><select class="fsel" id="fAttr" onchange="applyFilters()"><option value="">All</option><option value="yes">Yes (Reattributed)</option><option value="no">Not Reattributed</option></select></div>
           <button class="fbtn reset" onclick="resetFilters()">↺ Reset</button>
         </div>
@@ -1955,11 +2191,11 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <div class="fbar">
         <div class="fbar-title">🔽 Summary Filters</div>
         <div class="frow">
-          <div class="fg"><div class="flabel">Month</div><select class="fsel" id="sMonth" onchange="renderSummary()"><option value="">All Months</option></select></div>
-          <div class="fg"><div class="flabel">Zone</div><select class="fsel" id="sZone" onchange="renderSummary()"><option value="">All Zones</option></select></div>
+          <div class="fg"><div class="flabel">Month</div><div class="ms-wrap fsel" id="sMonth" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Zone</div><div class="ms-wrap fsel" id="sZone" style="min-width:130px"></div></div>
           <div class="fg"><div class="flabel">Movement</div><select class="fsel" id="sMov" onchange="renderSummary()"><option value="">All</option><option value="Forward">Forward</option><option value="RTO">RTO</option></select></div>
-          <div class="fg"><div class="flabel">Reason L1</div><select class="fsel" id="sR1" onchange="renderSummary()"><option value="">All</option></select></div>
-          <div class="fg"><div class="flabel">Location</div><select class="fsel" id="sLoc" onchange="renderSummary()"><option value="">All</option></select></div>
+          <div class="fg"><div class="flabel">Reason L1</div><div class="ms-wrap fsel" id="sR1" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Location</div><div class="ms-wrap fsel" id="sLoc" style="min-width:130px"></div></div>
           <button class="fbtn reset" onclick="resetSummary()">↺ Reset</button>
         </div>
       </div>
@@ -1997,10 +2233,10 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <div class="fbar">
         <div class="fbar-title">🔽 Ranking Filters</div>
         <div class="frow">
-          <div class="fg"><div class="flabel">Month</div><select class="fsel" id="rMonth" onchange="renderRanking()"><option value="">All Months</option></select></div>
-          <div class="fg"><div class="flabel">Zone</div><select class="fsel" id="rZone" onchange="renderRanking()"><option value="">All Zones</option></select></div>
-          <div class="fg"><div class="flabel">Regional Head</div><select class="fsel" id="rRH" onchange="renderRanking()"><option value="">All</option></select></div>
-          <div class="fg"><div class="flabel">Cluster Head</div><select class="fsel" id="rCH" onchange="renderRanking()"><option value="">All</option></select></div>
+          <div class="fg"><div class="flabel">Month</div><div class="ms-wrap fsel" id="rMonth" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Zone</div><div class="ms-wrap fsel" id="rZone" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Regional Head</div><div class="ms-wrap fsel" id="rRH" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Cluster Head</div><div class="ms-wrap fsel" id="rCH" style="min-width:130px"></div></div>
           <div class="fg"><div class="flabel">Top N</div><select class="fsel" id="rTop" onchange="renderRanking()"><option value="10">Top 10</option><option value="20">Top 20</option><option value="50">Top 50</option><option value="999">All</option></select></div>
           <button class="fbtn reset" onclick="resetRanking()">↺ Reset</button>
         </div>
@@ -2141,10 +2377,10 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <div class="fbar" style="margin-bottom:12px">
         <div class="fbar-title">🔽 RCA Progress Filters</div>
         <div class="frow">
-          <div class="fg"><div class="flabel">Month</div><select class="fsel" id="rcaFMonth" onchange="renderRCAProgress()"><option value="">All Months</option></select></div>
-          <div class="fg"><div class="flabel">Zone</div><select class="fsel" id="rcaFZone" onchange="renderRCAProgress()"><option value="">All Zones</option></select></div>
-          <div class="fg"><div class="flabel">Regional Head</div><select class="fsel" id="rcaFRH" onchange="renderRCAProgress()"><option value="">All</option></select></div>
-          <div class="fg"><div class="flabel">Cluster Head</div><select class="fsel" id="rcaFCH" onchange="renderRCAProgress()"><option value="">All</option></select></div>
+          <div class="fg"><div class="flabel">Month</div><div class="ms-wrap fsel" id="rcaFMonth" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Zone</div><div class="ms-wrap fsel" id="rcaFZone" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Regional Head</div><div class="ms-wrap fsel" id="rcaFRH" style="min-width:130px"></div></div>
+          <div class="fg"><div class="flabel">Cluster Head</div><div class="ms-wrap fsel" id="rcaFCH" style="min-width:130px"></div></div>
           <button class="fbtn reset" onclick="resetRCAFilters()">↺ Reset</button>
         </div>
       </div>
@@ -2509,6 +2745,11 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       <button class="btn-back" onclick="goHome()">← HOME</button>
     </div>
     <div class="section-body">
+      <div class="github-bar" style="margin-bottom:16px;">
+        <div class="github-status-dot" id="sortGhDot"></div>
+        <div class="github-info">GitHub: Auto-loads from <b>Karthik221188/Nexusops-360 › Sort code.xlsx</b></div>
+        <button class="btn-connect-gh" onclick="loadSortCodesFromGH()">🔄 RELOAD FROM GITHUB</button>
+      </div>
       <div class="filters-row">
         <div class="filter-group" style="flex:1">
           <div class="filter-label">SEARCH SORT CODE / LOCATION</div>
@@ -2533,7 +2774,7 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
         </div>
         <div style="overflow-x:auto">
           <table class="data-table" id="sortTable">
-            <thead><tr><th>#</th><th>SORT CODE</th><th>LOCATION NAME</th><th>ZONE</th><th>TYPE</th><th>CITY</th><th>STATE</th><th>STATUS</th></tr></thead>
+            <thead><tr><th>NO</th><th>DC CODE</th><th>SORT CODE</th><th>LOCATION</th><th>ZONE</th><th>TYPE</th><th>STATUS</th></tr></thead>
             <tbody id="sortBody"></tbody>
           </table>
         </div>
@@ -2660,6 +2901,215 @@ textarea.finput{resize:vertical;min-height:100px;line-height:1.5}
       </div>
     </div>
   </div>
+
+  <!-- ======== D: ESCALATION MATRIX ======== -->
+  <div id="escalationMatrix" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> Escalation Matrix</div>
+        <div class="section-title">📋 Escalation Matrix</div>
+      </div>
+      <div class="flex gap-12">
+        <button class="btn-download" onclick="downloadCSV('escTable','escalation_matrix.csv')">⬇ EXPORT</button>
+        <button class="btn-back" onclick="goHome()">← HOME</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="github-bar">
+        <div class="github-status-dot" id="escGhDot" style="background:var(--accent-yellow)"></div>
+        <div class="github-info">GitHub: <b id="escGhRepo">Not connected</b> · File: <b>Matrix.xlsx</b></div>
+        <input class="github-repo-input" id="escGhInput" placeholder="Karthik221188/Nexusops-360" value="Karthik221188/Nexusops-360"/>
+        <button class="btn-connect-gh" onclick="loadEscalationMatrix()">📥 LOAD MATRIX</button>
+      </div>
+      <div class="filters-row">
+        <div class="filter-group"><div class="filter-label">ZONE</div>
+          <select class="filter-select" id="escZone" onchange="filterEscMatrix()"><option value="">All Zones</option></select></div>
+        <div class="filter-group"><div class="filter-label">TYPE</div>
+          <select class="filter-select" id="escType" onchange="filterEscMatrix()"><option value="">All Types</option></select></div>
+        <div class="filter-group"><div class="filter-label">REGIONAL HEAD</div>
+          <select class="filter-select" id="escRH" onchange="filterEscMatrix()"><option value="">All RHs</option></select></div>
+        <div class="filter-group" style="flex:1"><div class="filter-label">SEARCH LOCATION</div>
+          <input class="filter-input" style="width:100%" id="escSearch" placeholder="Search location code..." oninput="filterEscMatrix()"/></div>
+        <button class="btn-filter" onclick="filterEscMatrix()">APPLY</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head-row">
+          <div class="table-title">📋 Escalation Matrix <span class="table-count" id="escCount">(0 records)</span></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="escTable">
+            <thead><tr>
+              <th>#</th><th>LOCATION CODE</th><th>ZONE</th><th>TYPE</th><th>RH</th><th>CH</th>
+              <th>AM1 NAME</th><th>AM1 MOBILE</th><th>AM2 NAME</th><th>AM2 MOBILE</th>
+              <th>PARTNER 1</th><th>P1 MOBILE</th><th>PARTNER 2</th><th>P2 MOBILE</th>
+            </tr></thead>
+            <tbody id="escBody">
+              <tr><td colspan="14" style="text-align:center;padding:30px;color:var(--text-muted);">Load Matrix.xlsx from GitHub to view escalation data</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== E: NODE LEVEL COMPLIANCE ======== -->
+  <div id="complianceSection" class="section-wrapper">
+    <div class="section-header">
+      <div>
+        <div class="breadcrumb">NEXUSOPS-360 <span>›</span> Node Level Compliance</div>
+        <div class="section-title">🔗 Node Level Compliance · D0+ 30Min</div>
+      </div>
+      <div class="flex gap-12">
+        <button class="btn-download" onclick="exportComplianceCSV()">⬇ EXPORT</button>
+        <button class="btn-back" onclick="goHome()">← HOME</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <!-- Paste area -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:var(--accent-cyan);margin-bottom:4px;">📋 PASTE COMPLIANCE DATA</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;">Paste from Excel · Headers: date | facility_1 | RH | facility_Type | Volume | Matured % | Connection | D0+ 30Min-bagging | D0+ 30Min</div>
+        <textarea id="compPasteArea" style="width:100%;min-height:120px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;resize:vertical;" placeholder="Paste Excel data here (tab-separated)..."></textarea>
+        <div style="display:flex;gap:12px;margin-top:12px;">
+          <button class="btn-submit" onclick="parseComplianceData()">⚡ PARSE & LOAD</button>
+          <button class="btn-download" onclick="clearComplianceData()" style="background:rgba(255,51,102,0.1);border-color:rgba(255,51,102,0.3);color:var(--accent-red);">🗑 CLEAR</button>
+        </div>
+      </div>
+      <!-- Filters -->
+      <div class="filters-row">
+        <div class="filter-group"><div class="filter-label">DATE</div>
+          <input type="date" class="filter-input" id="compDate" onchange="renderCompliance()"/></div>
+        <div class="filter-group"><div class="filter-label">FACILITY TYPE</div>
+          <select class="filter-select" id="compFacType" onchange="renderCompliance()"><option value="">All Types</option></select></div>
+        <div class="filter-group"><div class="filter-label">REGIONAL HEAD</div>
+          <select class="filter-select" id="compRH" onchange="renderCompliance()"><option value="">All RH</option></select></div>
+        <div class="filter-group" style="flex:1"><div class="filter-label">FACILITY SEARCH</div>
+          <input class="filter-input" id="compSearch" placeholder="Search facility..." oninput="renderCompliance()" style="width:100%"/></div>
+        <button class="btn-filter" onclick="renderCompliance()">APPLY</button>
+      </div>
+      <!-- Summary KPIs -->
+      <div class="stats-row cols-4" id="compKPIs" style="margin-bottom:20px;"></div>
+      <!-- Rankings -->
+      <div class="table-wrap" style="margin-bottom:20px;">
+        <div class="table-head-row">
+          <div class="table-title">🏅 Compliance Ranking <span class="table-count" id="compCount">(0 records)</span></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="compTable">
+            <thead><tr>
+              <th>RANK</th><th>FACILITY</th><th>RH</th><th>TYPE</th><th>DATE</th><th>VOLUME</th>
+              <th>MATURED %</th><th>CONNECTION D0+30</th><th>BAGGING D0+30</th><th>STATUS</th><th>RCA</th>
+            </tr></thead>
+            <tbody id="compBody">
+              <tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text-muted);">Paste compliance data above to view</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- 7-day trend charts -->
+      <div class="charts-grid cols-2">
+        <div class="chart-card"><div class="chart-card-title">📈 Connection D0+30 — Last 7 Days</div><div class="chart-canvas-wrap"><canvas id="compChart1"></canvas></div></div>
+        <div class="chart-card"><div class="chart-card-title">📈 Bagging D0+30 — Last 7 Days</div><div class="chart-canvas-wrap"><canvas id="compChart2"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== LOGIN LOG MODAL ======== -->
+  <div id="loginLogModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+    <div style="background:#0d1f35;border:1px solid rgba(0,200,255,0.4);border-radius:14px;padding:28px;width:800px;max-width:95vw;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--accent-yellow);">🔐 Login Log — All Sessions</div>
+        <button onclick="document.getElementById('loginLogModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table" id="loginLogTable">
+          <thead><tr><th>#</th><th>USER</th><th>ROLE</th><th>MOBILE</th><th>LOGIN TIME</th><th>LOGOUT TIME</th><th>SESSION DURATION</th><th>STATUS</th></tr></thead>
+          <tbody id="loginLogBody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">No sessions recorded</td></tr></tbody>
+        </table>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:12px;">
+        <button class="btn-download" onclick="downloadCSV('loginLogTable','login_log.csv')">⬇ EXPORT CSV</button>
+        <button onclick="clearLoginLog()" style="background:rgba(255,51,102,0.1);border:1px solid rgba(255,51,102,0.3);border-radius:6px;padding:8px 16px;color:var(--accent-red);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;">🗑 CLEAR LOG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== TASK DETAIL MODAL ======== -->
+  <div id="taskDetailModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+    <div style="background:#0d1f35;border:1px solid rgba(0,200,255,0.4);border-radius:14px;padding:28px;width:560px;max-width:95vw;max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--accent-cyan);" id="taskDetailTitle">Task Details</div>
+        <button onclick="document.getElementById('taskDetailModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <div id="taskDetailBody" style="font-size:13px;color:var(--text-secondary);line-height:1.7;"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;">
+        <button class="btn-submit" onclick="replyToTask()" style="flex:1;">💬 REPLY / UPDATE</button>
+        <button onclick="document.getElementById('taskDetailModal').style.display='none'" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;padding:10px 20px;color:var(--text-muted);cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;">CLOSE</button>
+      </div>
+      <div id="taskReplyArea" style="display:none;margin-top:12px;">
+        <textarea id="taskReplyText" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text-primary);font-family:sans-serif;font-size:13px;outline:none;resize:vertical;min-height:80px;" placeholder="Type your update/response..."></textarea>
+        <button class="btn-submit" onclick="submitTaskReply()" style="margin-top:8px;width:100%;">📤 SUBMIT UPDATE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== KRA WEIGHTAGE EDITOR MODAL (SuperAdmin) ======== -->
+  <div id="kraWeightageModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+    <div style="background:#0d1f35;border:1px solid rgba(255,215,0,0.4);border-radius:14px;padding:28px;width:680px;max-width:95vw;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--accent-yellow);">⚙️ KRA WEIGHTAGE EDITOR — SuperAdmin</div>
+        <button onclick="document.getElementById('kraWeightageModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Define KRA items and their weightage. Total must equal 100%. Changes saved to local storage.</div>
+      <div id="kraWeightageList" style="margin-bottom:16px;"></div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button class="btn-submit" onclick="addKRAItem()" style="background:rgba(0,200,255,0.12);border:1px solid rgba(0,200,255,0.3);color:var(--accent-blue);">➕ ADD KRA ITEM</button>
+        <button class="btn-submit" onclick="saveKRAWeightage()">💾 SAVE WEIGHTAGE</button>
+        <div id="kraWeightTotal" style="display:flex;align-items:center;padding:0 14px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent-yellow);">Total: 0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== CREATE TASK MODAL ======== -->
+  <div id="createTaskModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;">
+    <div style="background:#0d1f35;border:1px solid rgba(0,200,255,0.4);border-radius:14px;padding:28px;width:560px;max-width:95vw;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--accent-cyan);">➕ CREATE NEW TASK</div>
+        <button onclick="document.getElementById('createTaskModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <div class="filter-group" style="margin-bottom:12px;">
+        <div class="filter-label">TASK TITLE</div>
+        <input class="filter-input" id="newTaskTitle" placeholder="Enter task title..." style="width:100%"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="filter-group">
+          <div class="filter-label">ASSIGN TO</div>
+          <select class="filter-select" id="newTaskAssignee" style="width:100%"><option value="">Select Person</option></select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">PRIORITY</div>
+          <select class="filter-select" id="newTaskPriority">
+            <option>HIGH</option><option>MEDIUM</option><option>LOW</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">DUE DATE & TIME</div>
+          <input type="datetime-local" class="filter-input" id="newTaskDue" style="width:100%"/>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">ZONE</div>
+          <select class="filter-select" id="newTaskZone">
+            <option>South</option><option>North</option><option>East</option><option>West</option><option>All</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group" style="margin-bottom:16px;">
+        <div class="filter-label">DESCRIPTION</div>
+        <textarea style="width:100%;min-height:80px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text-primary);font-family:sans-serif;font-size:13px;outline:none;resize:vertical;" id="newTaskDesc" placeholder="Task description..."></textarea>
+      </div>
+      <button class="btn-submit" onclick="createNewTask()" style="width:100%;">💾 CREATE TASK</button>
+    </div>
+  </div>
 </div><!-- /mainApp -->
 
 <div class="notification" id="toast"><span id="toastIcon">✅</span><span id="toastMsg">Done</span></div>
@@ -2687,6 +3137,48 @@ var nexusKraScores = JSON.parse(localStorage.getItem('kraScores')||'{}');
 var nexusCalloutData = JSON.parse(localStorage.getItem('callouts')||'[]');
 var nexusTaskTimers = {};
 
+// ── KRA PREDEFINED DATA (10 items as per official KRA framework) ──
+var KRA_DEFAULT = [
+  {id:1, kr:'SC Vol. & Manpower',
+   desc:'1. Flagging up if any manpower drop or over/lower attainment of vol. 2. Sharing fortnightly Vol. projection with partner and alignment.',
+   weightage:5, category:'Operations'},
+  {id:2, kr:'SC Inbound and Landing',
+   desc:'NLH TAT validation and landing profile.',
+   weightage:5, category:'Operations'},
+  {id:3, kr:'SC DoD Operation and Losses Reduction',
+   desc:'1. Working with SC partner for efficient Operation. 2. Ageing control and IRT, label and other exception handling. 3. At facility hardstop losses reduction. 4. COD timely RTO marking and clearance. 5. Daily internal review call participation. 6. Tracker validation and timely update. Internal review, Daily node compliance RCA, Attempt Compliance NLH & At facility breach RCA.',
+   weightage:20, category:'Operations'},
+  {id:4, kr:'IB Pendency & Clearance',
+   desc:'1. End to end RCA and control on "at facility", "Shortage marked" and IB Intransit IB pendency. 2. Recon and pendency closure with upstream nodes on shortage and Intransit pendency. 3. IB Losses reduction and visibility.',
+   weightage:15, category:'Pendency'},
+  {id:5, kr:'OB Pendency & Clearance',
+   desc:'1. End to end control and updates on "OB Intransit" and "Shortage assigned" pendency. 2. Recon and pendency closure with downstream nodes. 3. Shortage assigned and OB Intransit losses reduction and visibility.',
+   weightage:20, category:'Pendency'},
+  {id:6, kr:'RLH Design and Utilisation',
+   desc:'1. Maintain the Optimal design coverage of the facility. 2. Identify and control RLH design deviation, lower/higher utilisation routes fix it.',
+   weightage:5, category:'Design'},
+  {id:7, kr:'Sort Code Creation and Load Balancing',
+   desc:'1. Cut off/route wise sort code creation needs to be shared within 24 hrs of tagging, if complete information available in the tracker. 2. Station wise vol balancing and route mapping. 3. Zone to Grid mapping. 4. Maintain the standard facility layout and control.',
+   weightage:10, category:'Operations'},
+  {id:8, kr:'Consumables Availability and Replenishment',
+   desc:'1. Track the consumables Inventory and fulfilment. 2. Ensuring no inventory shortfall.',
+   weightage:5, category:'Resources'},
+  {id:9, kr:'End to End Scrap Management',
+   desc:'1. Regular check of scrap generation (Damage bags, used tags, used bolt seal, corrugated boxes and Lost/damaged, Delivered/duplicate) and plan liquidation. 2. Vendor billing and payment tracking.',
+   weightage:5, category:'Resources'},
+  {id:10, kr:'Process Improvements',
+   desc:'Improvement initiatives, Kaizens Submission and new idea for system excellence.',
+   weightage:10, category:'Improvement'}
+];
+
+// Load KRA: first from localStorage custom, then from default
+function getActiveKRA(){
+  var custom = JSON.parse(localStorage.getItem('kraCustomWeightage')||'null');
+  if(custom && custom.length) return custom;
+  return KRA_DEFAULT.map(function(k){return {id:k.id, kr:k.kr, desc:k.desc, weightage:k.weightage};});
+}
+
+
 // ── USER DB — synced from GitHub kra.xlsx Sheet2 after load ──
 var NEXUS_USERS = [
   {email:'superadmin@meesho.com',mobile:'9999999999',password:'Admin@2026',name:'Super Admin',designation:'superadmin',zone:'All'},
@@ -2697,70 +3189,157 @@ var NEXUS_USERS = [
 
 // ── SORT CODES ──
 var SORT_CODES = [
-  {code:'CTS',name:'Chennai Transfer Station',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu'},
-  {code:'BLRS',name:'Bangalore Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka'},
-  {code:'HBS',name:'Hyderabad Balanagar Sort',zone:'South',type:'Hub',city:'Hyderabad',state:'Telangana'},
-  {code:'HYDS',name:'Hyderabad Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
-  {code:'HYS',name:'Hyderabad Small Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
-  {code:'HGS1',name:'Hyderabad Gateway Sort 1',zone:'South',type:'City Hub',city:'Hyderabad',state:'Telangana'},
-  {code:'BGS1',name:'Bangalore Gateway Sort 1',zone:'South',type:'City Hub',city:'Bangalore',state:'Karnataka'},
-  {code:'H2LS',name:'Hyderabad L2 Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
-  {code:'CIS',name:'Chennai Irungattukottai Sort',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu'},
-  {code:'H4LS',name:'Hyderabad L4 Sort',zone:'South',type:'Hub',city:'Hyderabad',state:'Telangana'},
-  {code:'BLS',name:'Bangalore Large Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka'},
-  {code:'HBLS',name:'Hyderabad BL Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana'},
-  {code:'CFS',name:'Chennai Final Sort',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu'},
-  {code:'IMS',name:'Indore Main Sort',zone:'West',type:'Sort Centre',city:'Indore',state:'MP'},
-  {code:'VWS',name:'Vizag West Sort',zone:'East',type:'Sort Centre',city:'Visakhapatnam',state:'AP'},
-  {code:'BLFS',name:'Bangalore Final Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka'},
-  {code:'BDRS',name:'Bhubaneswar DR Sort',zone:'East',type:'Sort Centre',city:'Bhubaneswar',state:'Odisha'},
-  {code:'VJWS',name:'Vijayawada Sort',zone:'South',type:'Sort Centre',city:'Vijayawada',state:'AP'},
-  {code:'PNDS',name:'Pune D Sort',zone:'West',type:'Sort Centre',city:'Pune',state:'Maharashtra'},
-  {code:'VZS',name:'Vizag Sort',zone:'East',type:'Sort Centre',city:'Visakhapatnam',state:'AP'},
-  {code:'KOCS',name:'Kochi Sort',zone:'South',type:'Sort Centre',city:'Kochi',state:'Kerala'},
-  {code:'KDPS',name:'Kadapa Sort',zone:'South',type:'Sort Centre',city:'Kadapa',state:'AP'},
-  {code:'DHS',name:'Dharuhera Sort',zone:'North',type:'Sort Centre',city:'Dharuhera',state:'Haryana'},
-  {code:'CBTS',name:'Coimbatore Sort',zone:'South',type:'Sort Centre',city:'Coimbatore',state:'Tamil Nadu'}
+  {no:1,dcCode:'CTS01',code:'CTS',name:'Chennai Transfer Station',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'BLRS',name:'Bangalore Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'HBS',name:'Hyderabad Balanagar Sort',zone:'South',type:'Hub',city:'Hyderabad',state:'Telangana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'HYDS',name:'Hyderabad Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'HYS',name:'Hyderabad Small Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'HGS1',name:'Hyderabad Gateway Sort 1',zone:'South',type:'City Hub',city:'Hyderabad',state:'Telangana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'BGS1',name:'Bangalore Gateway Sort 1',zone:'South',type:'City Hub',city:'Bangalore',state:'Karnataka',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'H2LS',name:'Hyderabad L2 Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'CIS',name:'Chennai Irungattukottai Sort',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'H4LS',name:'Hyderabad L4 Sort',zone:'South',type:'Hub',city:'Hyderabad',state:'Telangana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'BLS',name:'Bangalore Large Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'HBLS',name:'Hyderabad BL Sort',zone:'South',type:'Sort Centre',city:'Hyderabad',state:'Telangana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'CFS',name:'Chennai Final Sort',zone:'South',type:'Sort Centre',city:'Chennai',state:'Tamil Nadu',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'IMS',name:'Indore Main Sort',zone:'West',type:'Sort Centre',city:'Indore',state:'MP',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'VWS',name:'Vizag West Sort',zone:'East',type:'Sort Centre',city:'Visakhapatnam',state:'AP',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'BLFS',name:'Bangalore Final Sort',zone:'South',type:'Sort Centre',city:'Bangalore',state:'Karnataka',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'BDRS',name:'Bhubaneswar DR Sort',zone:'East',type:'Sort Centre',city:'Bhubaneswar',state:'Odisha',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'VJWS',name:'Vijayawada Sort',zone:'South',type:'Sort Centre',city:'Vijayawada',state:'AP',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'PNDS',name:'Pune D Sort',zone:'West',type:'Sort Centre',city:'Pune',state:'Maharashtra',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'VZS',name:'Vizag Sort',zone:'East',type:'Sort Centre',city:'Visakhapatnam',state:'AP',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'KOCS',name:'Kochi Sort',zone:'South',type:'Sort Centre',city:'Kochi',state:'Kerala',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'KDPS',name:'Kadapa Sort',zone:'South',type:'Sort Centre',city:'Kadapa',state:'AP',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'DHS',name:'Dharuhera Sort',zone:'North',type:'Sort Centre',city:'Dharuhera',state:'Haryana',status:'ACTIVE'},
+  {no:'',dcCode:'',code:'CBTS',name:'Coimbatore Sort',zone:'South',type:'Sort Centre',city:'Coimbatore',state:'Tamil Nadu',status:'ACTIVE'}
 ];
 
 // ── CLOCK — single instance, updates both login & nav ──
 function runClock(){
   var now=new Date();
-  var ts=now.toLocaleTimeString('en-IN');
-  var ds=now.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  // Format time with leading zeros
+  var h=String(now.getHours()).padStart(2,'0');
+  var m=String(now.getMinutes()).padStart(2,'0');
+  var s=String(now.getSeconds()).padStart(2,'0');
+  var ts=h+':'+m+':'+s;
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var ds=days[now.getDay()]+', '+String(now.getDate()).padStart(2,'0')+' '+months[now.getMonth()]+' '+now.getFullYear();
+  // Login screen clock
   var ll=document.getElementById('loginLiveTime');
   var ld=document.getElementById('loginLiveDate');
+  // Nav bar
   var nd=document.getElementById('navDateTime');
+  // Nav login-time badge
+  var nlt=document.getElementById('navLoginTimeBadge');
   if(ll) ll.textContent=ts;
   if(ld) ld.textContent=ds;
-  if(nd) nd.textContent=ds+' '+ts;
+  if(nd) nd.textContent=ds+' | '+ts;
+  if(nlt&&loginTime){
+    var elapsed=Math.floor((now-loginTime)/1000);
+    var eh=String(Math.floor(elapsed/3600)).padStart(2,'0');
+    var em=String(Math.floor((elapsed%3600)/60)).padStart(2,'0');
+    var es=String(elapsed%60).padStart(2,'0');
+    nlt.textContent='Login: '+loginTime.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' | Session: '+eh+':'+em+':'+es;
+  }
 }
-setInterval(runClock,1000);
-runClock();
+// Start clock - works before and after DOM ready
+(function startClock(){
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){runClock();setInterval(runClock,1000);});
+  } else {
+    runClock();
+    setInterval(runClock,1000);
+  }
+})();
 
-// ── LOGIN TYPE TOGGLE ──
-function nexusToggleLoginType(){
-  var t=document.getElementById('nexusLoginType').value;
-  var lbl=document.getElementById('nexusLoginLabel');
-  var inp=document.getElementById('nexusLoginId');
-  if(t==='mobile'){lbl.textContent='MOBILE NUMBER';inp.type='tel';inp.maxLength=10;inp.placeholder='9999999999';}
-  else{lbl.textContent='EMAIL ADDRESS';inp.type='email';inp.maxLength=150;inp.placeholder='superadmin@meesho.com';}
+// ── LOGIN TYPE TOGGLE (legacy stub) ──
+function nexusToggleLoginType(){}
+
+// ── LOGIN LOG STORAGE ──
+var loginLog = JSON.parse(localStorage.getItem('nexusLoginLog')||'[]');
+var currentSessionLogId = null;
+
+function recordLogin(user){
+  var entry={
+    id: Date.now(),
+    name: user.name,
+    role: (user.designation||'').replace(/_/g,' ').toUpperCase(),
+    mobile: user.mobile,
+    email: user.email,
+    loginTime: new Date().toISOString(),
+    logoutTime: null,
+    sessionMs: null,
+    status: 'Active'
+  };
+  loginLog.unshift(entry);
+  if(loginLog.length>500) loginLog=loginLog.slice(0,500);
+  localStorage.setItem('nexusLoginLog', JSON.stringify(loginLog));
+  currentSessionLogId = entry.id;
+}
+
+function recordLogout(){
+  if(!currentSessionLogId) return;
+  var entry = loginLog.find(function(e){return e.id===currentSessionLogId;});
+  if(entry){
+    entry.logoutTime = new Date().toISOString();
+    entry.sessionMs = Date.now() - entry.id;
+    entry.status = 'Completed';
+    localStorage.setItem('nexusLoginLog', JSON.stringify(loginLog));
+  }
+}
+
+function showLoginLog(){
+  var modal = document.getElementById('loginLogModal');
+  if(!modal) return;
+  var body = document.getElementById('loginLogBody');
+  if(!body) return;
+  var rows = loginLog.map(function(e, i){
+    var dur = e.sessionMs ? formatDuration(e.sessionMs) : (e.status==='Active' ? '<span style="color:var(--accent-green)">● LIVE</span>' : '-');
+    var lo = e.logoutTime ? new Date(e.logoutTime).toLocaleString('en-IN') : '-';
+    return '<tr><td>'+(i+1)+'</td><td><b>'+e.name+'</b></td><td><span class="badge badge-blue">'+e.role+'</span></td>'
+      +'<td style="font-family:monospace">'+e.mobile+'</td>'
+      +'<td>'+new Date(e.loginTime).toLocaleString('en-IN')+'</td>'
+      +'<td>'+lo+'</td><td>'+dur+'</td>'
+      +'<td><span class="badge '+(e.status==='Active'?'badge-green':'badge-yellow')+'">'+e.status+'</span></td></tr>';
+  }).join('');
+  body.innerHTML = rows || '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">No sessions recorded</td></tr>';
+  modal.style.display = 'flex';
+}
+
+function clearLoginLog(){
+  if(!confirm('Clear all login logs?')) return;
+  loginLog=[];
+  localStorage.setItem('nexusLoginLog','[]');
+  showLoginLog();
+}
+
+function formatDuration(ms){
+  var s=Math.floor(ms/1000);
+  var h=Math.floor(s/3600); var m=Math.floor((s%3600)/60); var sc=s%60;
+  return (h?h+'h ':'')+(m?m+'m ':'')+(sc+'s');
+}
+
+function showSessionInfo(){
+  if(!nexusCurrentUser||!loginTime) return;
+  var elapsed = formatDuration(Date.now()-loginTime.getTime());
+  showToast('Login: '+loginTime.toLocaleTimeString('en-IN')+' · Session: '+elapsed, '⏱');
 }
 
 // ── LOGIN ──
 function nexusDoLogin(){
-  var t=(document.getElementById('nexusLoginType')||{value:'email'}).value;
-  var id=((document.getElementById('nexusLoginId')||{}).value||'').trim();
+  var mobile=((document.getElementById('nexusLoginId')||{}).value||'').trim();
   var pwd=((document.getElementById('nexusLoginPwd')||{}).value||'');
   var err=document.getElementById('nexusLoginErr');
-  if(!id||!pwd){err.style.display='block';err.textContent='Please enter credentials.';return;}
+  if(!mobile||!pwd){err.style.display='block';err.textContent='Enter mobile number and password.';return;}
 
-  // Try to sync from LossIQ USERS if available
+  // Sync users from LossIQ USERS array if available
   if(typeof USERS!=='undefined'&&USERS.length>1){
     var sa=NEXUS_USERS[0];
     var mapped=USERS.map(function(u){return{
       email:(u.email||'').toLowerCase().trim(),
-      mobile:(u.mobile||'').trim(),
+      mobile:String(u.mobile||'').trim(),
       password:u.password||'Pass@123',
       name:u.name||u.email||'',
       designation:u.role==='super'?'superadmin':u.role==='admin'?'regional_head':u.role==='partner'?'cluster_head':'area_manager',
@@ -2770,30 +3349,47 @@ function nexusDoLogin(){
     NEXUS_USERS=mapped;
   }
 
-  var user=NEXUS_USERS.find(function(u){
-    return t==='mobile'?u.mobile===id:u.email.toLowerCase()===id.toLowerCase();
-  });
+  var user=NEXUS_USERS.find(function(u){return String(u.mobile)===String(mobile);});
   if(!user||user.password!==pwd){
     err.style.display='block';
-    err.textContent='Invalid credentials. Email: superadmin@meesho.com | Mobile: 9999999999 | Password: Admin@2026';
+    err.textContent='⛔ Invalid mobile or password. Try: 9999999999 / Admin@2026';
     return;
   }
 
   nexusCurrentUser=Object.assign({},user);
   loginTime=new Date();
 
+  // Record login
+  recordLogin(user);
+
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('mainApp').style.display='block';
 
-  var desig=user.designation.replace(/_/g,' ').toUpperCase();
-  function se(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  var desig=(user.designation||'').replace(/_/g,' ').toUpperCase();
+  function se(eid,v){var e=document.getElementById(eid);if(e)e.textContent=v;}
   se('navUserName',user.name);
   se('navUserRole',desig);
-  se('navUserAvatar',user.name.charAt(0).toUpperCase());
+  se('navUserAvatar',(user.name||'U').charAt(0).toUpperCase());
   se('homeWelcomeName',user.name);
+  var nltBadge=document.getElementById('navLoginTimeBadge');
+  if(nltBadge){nltBadge.style.display='block';}
   var elt=document.getElementById('empLoginTime');
   if(elt) elt.textContent=loginTime.toLocaleTimeString('en-IN');
+  var eld=document.getElementById('empLoginDate');
+  if(eld) eld.textContent=loginTime.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
   err.style.display='none';
+
+  // Show login log button only for superadmin
+  var llBtn=document.getElementById('loginLogBtn');
+  if(llBtn) llBtn.style.display=(user.designation==='superadmin'?'block':'none');
+
+  // Show admin task button
+  var atBtn=document.getElementById('adminTaskBtn');
+  if(atBtn) atBtn.style.display='block'; // all users can create tasks
+
+  // Show team dir add btn
+  var tdAddBtn=document.getElementById('tdAddBtn');
+  if(tdAddBtn) tdAddBtn.style.display=(user.designation==='superadmin'?'block':'none');
 
   // Set LossIQ currentUser
   currentUser={
@@ -2811,19 +3407,33 @@ function nexusDoLogin(){
   if(urEl) urEl.textContent=currentUser.role==='super'?'Super Admin':currentUser.role==='admin'?'Admin':'User';
 
   startNexusSession();
-  renderSortCodes();
+  loadSortCodesFromGH();
+  loadEscalationMatrix();
   renderNexusCallouts();
+  renderTeamDirectory();
+  renderMyTasks();
+  renderAdminTaskBoard();
+  populateAssigneeDropdowns();
 
   // Init LossIQ in background
-  syncUsersFromCloud().catch(function(){}).finally(function(){
-    if(typeof initApp==='function') initApp();
-  });
+  if(typeof syncUsersFromCloud==='function'){
+    syncUsersFromCloud().catch(function(){}).finally(function(){
+      if(typeof initApp==='function') initApp();
+    });
+  } else if(typeof initApp==='function') {
+    initApp();
+  }
+  // Post-login UI init (notifications, filters)
+  setTimeout(function(){ if(typeof nexusPostLogin==='function') nexusPostLogin(); }, 300);
 }
 
 function nexusDoLogout(){
   if(!confirm('Log off from Nexusops-360?')) return;
+  recordLogout();
+  var nltBadge=document.getElementById('navLoginTimeBadge');
+  if(nltBadge) nltBadge.style.display='none';
   clearInterval(sessionInterval);
-  nexusCurrentUser=null; currentUser=null; loginTime=null;
+  nexusCurrentUser=null; currentUser=null; loginTime=null; currentSessionLogId=null;
   document.getElementById('mainApp').style.display='none';
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('nexusLoginId').value='';
@@ -2839,8 +3449,11 @@ function startNexusSession(){
     var h=String(Math.floor(d/3600)).padStart(2,'0');
     var m=String(Math.floor((d%3600)/60)).padStart(2,'0');
     var s=String(d%60).padStart(2,'0');
+    var hms=h+':'+m+':'+s;
     var st=document.getElementById('sessionTimer');
-    if(st) st.textContent=h+':'+m+':'+s;
+    if(st) st.textContent=hms;
+    var es=document.getElementById('empSessionDisplay');
+    if(es) es.textContent=hms;
   },1000);
 }
 
@@ -2851,6 +3464,17 @@ function openSection(id){
   var el=document.getElementById(id);
   if(el) el.classList.add('active');
   if(id==='fmFleet') filterFleet();
+  if(id==='sortCode') renderSortCodes();
+  if(id==='empMgmt'){renderTeamDirectory();renderMyTasks();renderAdminTaskBoard();}
+  if(id==='callouts') renderNexusCallouts();
+  if(id==='complianceSection'&&COMPLIANCE_DATA.length){populateCompFilters();renderCompliance();}
+  if(id==='escalationMatrix'&&ESCALATION_DATA.length){filterEscMatrix();}
+  if(id==='lossDash'){
+    setTimeout(function(){
+      if(typeof initApp==='function') initApp();
+      if(typeof liqTab==='function') liqTab('dashboard');
+    },100);
+  }
 }
 function goHome(){
   document.getElementById('homeMenu').style.display='flex';
@@ -2863,7 +3487,7 @@ function liqTab(name){
   document.querySelectorAll('#lossDash .liqpanel').forEach(function(p){p.classList.toggle('active',p.id==='panel-'+name);});
   if(name==='data'&&typeof initUploadPanel==='function') initUploadPanel();
   if(name==='admin'&&typeof renderAdmin==='function') renderAdmin();
-  if(name==='locations'&&typeof renderLocMgmt==='function') renderLocMgmt();
+  if(name==='locations'){if(typeof renderLocMgmt==='function'){try{renderLocMgmt();}catch(e){console.warn('LocMgmt:',e);}}}
   if(name==='ranking'&&typeof renderRanking==='function') renderRanking();
   if(name==='performance'&&typeof renderPerf==='function') renderPerf();
   if(name==='rca'&&typeof renderRCAProgress==='function') renderRCAProgress();
@@ -2878,14 +3502,20 @@ function switchTab(group,tabId){
   var target=document.getElementById(tabId);
   if(!target) return;
   var parent=target.parentElement;
-  parent.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+  parent.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');c.style.display='none';});
   target.classList.add('active');
+  target.style.display='block';
   var nav=parent.previousElementSibling;
   if(nav&&nav.classList.contains('tab-nav')){
     nav.querySelectorAll('.tab-btn').forEach(function(b){
-      b.classList.toggle('active',b.onclick&&b.onclick.toString().includes(tabId));
+      var active=b.getAttribute('onclick')&&b.getAttribute('onclick').includes(tabId);
+      b.classList.toggle('active',active);
     });
   }
+  // Post-render actions
+  if(tabId==='kraCluster') renderClusterScores();
+  if(tabId==='kraAM') renderAMScores();
+  if(tabId==='kraSuperAdmin') renderMappingTables();
 }
 
 function showDevModal(name){
@@ -2979,12 +3609,12 @@ async function loadKRAData(){
     }
     setGhStatus('kraGhDot','kraGhRepo','ok',repo);
     renderKRAMyPerf();populateKRAFilters();
-    showToast('KRA loaded: '+nexusKraData.sheet1.length+' KRAs','✅');
+    populateAssigneeDropdowns();renderTeamDirectory();showToast('KRA loaded: '+nexusKraData.sheet1.length+' KRAs','✅');
   }else{
     nexusKraData=generateDemoKRA();
     setGhStatus('kraGhDot','kraGhRepo','ok',repo+' (demo)');
     renderKRAMyPerf();populateKRAFilters();
-    showToast('Demo KRA loaded','⚠️');
+    populateAssigneeDropdowns();showToast('Demo KRA loaded','⚠️');
   }
 }
 
@@ -3037,12 +3667,14 @@ function renderKRAMyPerf(){
   var month=(document.getElementById('kraMonth')||{value:''}).value;
   var week=(document.getElementById('kraWeek')||{value:'all'}).value||'all';
   var totalScore=0,totalW=0;
-  body.innerHTML=nexusKraData.sheet1.map(function(r,i){
+  var kraItems=getActiveKRA(); body.innerHTML=kraItems.map(function(r,i){
     var srNo=r['Sr. No.']||r.Sr_No||(i+1);
     var kr=r['Key Responsibility (KR)']||r.Key_Responsibility||'';
     var desc=r['KR Discriptions']||r.KR_Description||'';
     var wt=parseFloat(r.Weightage)||0;
-    var key=(nexusCurrentUser?nexusCurrentUser.email:'')+'|'+month+'|'+week+'|'+srNo;
+    var keyByEmail=(nexusCurrentUser?nexusCurrentUser.email:'')+'|'+month+'|'+week+'|'+srNo;
+    var keyByName=(nexusCurrentUser?nexusCurrentUser.name:'')+'|'+month+'|'+week+'|'+srNo;
+    var key=nexusKraScores[keyByName]!==undefined?keyByName:keyByEmail;
     var score=nexusKraScores[key]!==undefined?nexusKraScores[key]:0;
     totalScore+=score;totalW+=wt;
     return '<tr><td>'+srNo+'</td><td>'+kr+'</td><td style="max-width:250px;white-space:normal;font-size:12px">'+desc+'</td><td>'+wt+'%</td><td><span class="badge '+(score>=wt*0.8?'badge-green':score>=wt*0.5?'badge-yellow':'badge-red')+'">'+(score||'-')+'</span></td></tr>';
@@ -3059,11 +3691,11 @@ function loadKRAScoreSheet(){
   if(!person||!month||!body){showToast('Select person & month first','⚠️');return;}
   var role=nexusCurrentUser?nexusCurrentUser.designation:'';
   var canScore=['superadmin','regional_head','cluster_head'].includes(role);
-  body.innerHTML=nexusKraData.sheet1.map(function(r,i){
-    var srNo=r['Sr. No.']||r.Sr_No||(i+1);
-    var kr=r['Key Responsibility (KR)']||r.Key_Responsibility||'';
-    var desc=r['KR Discriptions']||r.KR_Description||'';
-    var wt=parseFloat(r.Weightage)||0;
+  var _kra=getActiveKRA(); body.innerHTML=_kra.map(function(r,i){
+    var srNo=r.id||(i+1);
+    var kr=r.kr||r['Key Responsibility (KR)']||'';
+    var desc=r.desc||r['KR Discriptions']||'';
+    var wt=parseFloat(r.weightage||r.Weightage)||0;
     var key=person+'|'+month+'|'+week+'|'+srNo;
     var cur=nexusKraScores[key]!==undefined?nexusKraScores[key]:'';
     if(!canScore) return '<tr><td>'+srNo+'</td><td>'+kr+'</td><td style="max-width:220px;white-space:normal;font-size:12px">'+desc+'</td><td>'+wt+'%</td><td><span class="badge badge-blue">'+(cur||'-')+'</span></td><td style="font-size:11px;color:var(--text-muted)">View Only</td></tr>';
@@ -3075,9 +3707,31 @@ function validateKRAScore(input,max){if(parseFloat(input.value)>max){input.value
 
 function saveKRAScore(person,month,week,kraId){
   var val=(document.getElementById('kraInput_'+kraId)||{value:0}).value;
-  nexusKraScores[person+'|'+month+'|'+week+'|'+kraId]=parseFloat(val)||0;
-  localStorage.setItem('kraScores',JSON.stringify(nexusKraScores));
-  showToast('Score saved for '+person+' KRA #'+kraId,'✅');
+  var v=parseFloat(val)||0;
+  // Cap at weightage
+  var kra=getActiveKRA().find(function(r){return (r.id||r['Sr. No.']||'')==kraId;});
+  var maxScore=kra?parseFloat(kra.Weightage||kra.wt||100):100;
+  if(v>maxScore){v=maxScore;var inp=document.getElementById('kraInput_'+kraId);if(inp)inp.value=v;showToast('Max score is '+maxScore+'%','⚠️');}
+  nexusKraScores[person+'|'+month+'|'+week+'|'+kraId]=v;
+  // Dual save: localStorage + IndexedDB for 365-day persistence
+  try { localStorage.setItem('kraScores',JSON.stringify(nexusKraScores)); } catch(e){}
+  if(typeof idbPut==='function'){
+    idbPut('nexus_kra_scores_v2', {scores:nexusKraScores, savedAt:new Date().toISOString()}).catch(function(){});
+  }
+  // Notify the scored person with their score details
+  var kraName=kra?kra.kr||kra['Key Responsibility (KR)']||('KRA #'+kraId):('KRA #'+kraId);
+  nexusAddNotification({
+    type:'kra_scored',
+    title:'Your KRA scored: '+kraName+' = '+v+'/'+maxScore,
+    assignees:[person],
+    from:nexusCurrentUser?nexusCurrentUser.name:'Admin',
+    time:new Date().toISOString()
+  });
+  // Refresh all affected views
+  renderKRAMyPerf();
+  renderClusterScores();
+  renderAMScores();
+  showToast('Score saved for '+person+' KRA #'+kraId+' = '+v,'✅');
 }
 
 function saveAllKRAScores(){
@@ -3085,12 +3739,16 @@ function saveAllKRAScores(){
   var month=(document.getElementById('kraScoreMonth')||{value:''}).value;
   var week=(document.getElementById('kraScoreWeek')||{value:'all'}).value||'all';
   if(!person||!month){showToast('Select person & month','⚠️');return;}
-  nexusKraData.sheet1.forEach(function(r,i){
-    var srNo=r['Sr. No.']||r.Sr_No||(i+1);
+  getActiveKRA().forEach(function(r,i){
+    var srNo=r.id||r['Sr. No.']||(i+1);
     var inp=document.getElementById('kraInput_'+srNo);
     if(inp) nexusKraScores[person+'|'+month+'|'+week+'|'+srNo]=parseFloat(inp.value)||0;
   });
-  localStorage.setItem('kraScores',JSON.stringify(nexusKraScores));
+  // Dual save: localStorage + IndexedDB for 365-day persistence
+  try { localStorage.setItem('kraScores',JSON.stringify(nexusKraScores)); } catch(e){}
+  if(typeof idbPut==='function'){
+    idbPut('nexus_kra_scores_v2', {scores:nexusKraScores, savedAt:new Date().toISOString()}).catch(function(){});
+  }
   showToast('All scores saved for '+person,'✅');
   renderClusterScores();renderAMScores();
 }
@@ -3116,7 +3774,112 @@ function renderAMScores(){
     return '<tr><td>'+(i+1)+'</td><td><b>'+am+'</b></td><td>'+(chRow?chRow['Cluster Head']||'-':'-')+'</td><td>'+(chRow?chRow.Zone||'-':'-')+'</td><td><span class="badge '+(total>=80?'badge-green':total>=60?'badge-yellow':'badge-red')+'">'+total.toFixed(1)+'</span></td><td>100%</td><td><span class="badge '+(total>=80?'badge-green':total>=60?'badge-yellow':'badge-red')+'">'+(total>=80?'Excellent':total>=60?'Good':'Needs Improvement')+'</span></td></tr>';
   }).join('')||'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">No AM data</td></tr>';
 }
-function saveMapping(){showToast('Mapping saved','✅');}
+
+
+function nexusSyncMappingToUsers(){
+  // When mapping is added, ensure the named persons exist in NEXUS_USERS
+  nexusKraData.sheet2.forEach(function(row){
+    var name = row.Name || '';
+    var ch = row['Cluster Head']||'';
+    var rh = row['Regional Head']||'';
+    // Add Area Manager if not present
+    if(name&&!NEXUS_USERS.find(function(u){return u.name===name;})){
+      NEXUS_USERS.push({name:name,email:'',mobile:'',password:'Pass@1234',designation:'area_manager',zone:row.Zone||''});
+    }
+    // Add CH if not present
+    if(ch&&!NEXUS_USERS.find(function(u){return u.name===ch;})){
+      NEXUS_USERS.push({name:ch,email:'',mobile:'',password:'Pass@1234',designation:'cluster_head',zone:row.Zone||''});
+    }
+    // Add RH if not present
+    if(rh&&!NEXUS_USERS.find(function(u){return u.name===rh;})){
+      NEXUS_USERS.push({name:rh,email:'',mobile:'',password:'Pass@1234',designation:'regional_head',zone:row.Zone||''});
+    }
+  });
+  // Save updated users
+  try{localStorage.setItem('nexusUsersExtra',JSON.stringify(NEXUS_USERS));}catch(e){}
+  if(typeof populateAssigneeDropdowns==='function') populateAssigneeDropdowns();
+  if(typeof nexusUpdateNotifBadge==='function') nexusUpdateNotifBadge();
+}
+
+// Load extra users from localStorage on startup
+(function(){
+  try{
+    var extra=JSON.parse(localStorage.getItem('nexusUsersExtra')||'[]');
+    extra.forEach(function(u){
+      if(!NEXUS_USERS.find(function(x){return x.name===u.name;})) NEXUS_USERS.push(u);
+    });
+  }catch(e){}
+  // Also restore KRA mapping
+  try{
+    var savedMap=JSON.parse(localStorage.getItem('nexusKraMapping')||'[]');
+    if(savedMap.length&&!nexusKraData.sheet2.length) nexusKraData.sheet2=savedMap;
+  }catch(e){}
+  // Restore tasks from IDB on startup
+  if(typeof loadTasksFromIDB==='function') loadTasksFromIDB();
+})();
+function addMappingRow(type){
+  if(type==='rh_ch'){
+    var rh=(document.getElementById('newRH')||{value:''}).value.trim();
+    var chsRaw=(document.getElementById('newCH')||{value:''}).value.trim();
+    var zone=(document.getElementById('newZone')||{value:''}).value.trim();
+    if(!rh||!chsRaw){showToast('RH and CH name(s) required','⚠️');return;}
+    // Support multiple CHs comma-separated
+    var chs=chsRaw.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    chs.forEach(function(ch){
+      if(!nexusKraData.sheet2.find(function(r){return r['Regional Head']===rh&&r['Cluster Head']===ch;})){
+        nexusKraData.sheet2.push({'Regional Head':rh,'Cluster Head':ch,Zone:zone,Name:''});
+      }
+    });
+    document.getElementById('newRH').value='';
+    document.getElementById('newCH').value='';
+    document.getElementById('newZone').value='';
+    showToast('Added '+chs.length+' CH mapping(s) for '+rh,'✅');
+  } else {
+    var ch2=(document.getElementById('newCH2')||{value:''}).value.trim();
+    var amsRaw=(document.getElementById('newAM')||{value:''}).value.trim();
+    if(!ch2||!amsRaw){showToast('CH and AM name(s) required','⚠️');return;}
+    // Support multiple AMs comma-separated
+    var ams=amsRaw.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    ams.forEach(function(am){
+      if(!nexusKraData.sheet2.find(function(r){return r['Cluster Head']===ch2&&r.Name===am;})){
+        nexusKraData.sheet2.push({'Regional Head':'','Cluster Head':ch2,Zone:'',Name:am});
+      }
+    });
+    document.getElementById('newCH2').value='';
+    document.getElementById('newAM').value='';
+    showToast('Added '+ams.length+' AM mapping(s) for '+ch2,'✅');
+  }
+  localStorage.setItem('nexusKraMapping',JSON.stringify(nexusKraData.sheet2));
+  // Also sync to NEXUS_USERS
+  nexusSyncMappingToUsers();
+  renderMappingTables();populateKRAFilters();nexusKraCascadeInit();
+}
+function saveMapping(){
+  // Collect manual input from editable rows
+  var rhchBody=document.getElementById('mappingRHCHBody');
+  var chamBody=document.getElementById('mappingCHAMBody');
+  if(rhchBody){
+    rhchBody.querySelectorAll('input[data-rh]').forEach(function(inp){
+      var rh=inp.dataset.rh;var ch=inp.value.trim();
+      if(rh&&ch){
+        var found=nexusKraData.sheet2.find(function(r){return r['Cluster Head']===ch;});
+        if(!found) nexusKraData.sheet2.push({'Regional Head':rh,'Cluster Head':ch,Zone:'',Name:''});
+      }
+    });
+  }
+  if(chamBody){
+    chamBody.querySelectorAll('input[data-ch]').forEach(function(inp){
+      var ch=inp.dataset.ch;var am=inp.value.trim();
+      if(ch&&am){
+        var found=nexusKraData.sheet2.find(function(r){return r.Name===am&&r['Cluster Head']===ch;});
+        if(!found) nexusKraData.sheet2.push({'Regional Head':'','Cluster Head':ch,Zone:'',Name:am});
+      }
+    });
+  }
+  localStorage.setItem('nexusKraMapping',JSON.stringify(nexusKraData.sheet2));
+  populateKRAFilters();populateAssigneeDropdowns();nexusKraCascadeInit();
+  showToast('Mapping saved & applied','✅');
+}
 
 // ── FM FLEET ──
 function filterFleet(){
@@ -3212,13 +3975,1101 @@ function startNexusTimer(n){
   return{id:id};
 }
 function updateTaskBadges(){
-  var c=['taskInboxList','taskInProgressList','taskDoneList'];
-  var b=document.querySelectorAll('.task-col-header .badge');
-  c.forEach(function(id,i){var cnt=(document.getElementById(id)||{querySelectorAll:function(){return[];}}).querySelectorAll('.task-card').length;if(b[i])b[i].textContent=cnt;});
+  var map=[
+    {list:'taskInboxList',badge:'badgeInbox'},
+    {list:'taskInProgressList',badge:'badgeInProgress'},
+    {list:'taskDoneList',badge:'badgeDone'}
+  ];
+  map.forEach(function(m){
+    var cnt=(document.getElementById(m.list)||{querySelectorAll:function(){return[];}}).querySelectorAll('.task-card').length;
+    var b=document.getElementById(m.badge);
+    if(b) b.textContent=cnt;
+  });
+}
+
+// ── EMPLOYEE TAB SWITCHER ──
+function switchEmpTab(tabId){
+  var tabs=['taskBoard','myTasks','taskArchive','teamDir','taskAdmin'];
+  tabs.forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    if(el) el.style.display=(t===tabId?'block':'none');
+    el && el.classList.toggle('active', t===tabId);
+  });
+  if(tabId==='myTasks') renderMyTasks();
+  if(tabId==='taskArchive') renderTaskArchive();
+  if(tabId==='teamDir') renderTeamDirectory();
+  if(tabId==='taskAdmin') renderAdminTaskBoard();
+  if(tabId==='taskBoard'||tabId==='taskAdmin') refreshTaskKPIs();
+  document.querySelectorAll('.tab-nav .tab-btn').forEach(function(b){
+    b.classList.remove('active');
+  });
+}
+
+// ── TASK STORAGE ──
+var nexusTasks = JSON.parse(localStorage.getItem('nexusTasks')||'[]');
+var nexusTaskReplies = JSON.parse(localStorage.getItem('nexusTaskReplies')||'{}');
+
+
+// ════════════════════════════════════════════════════════
+// TASK BOARD KPI REFRESH
+// ════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════
+// STORAGE STATUS — confirms data is saved in 3 layers
+// ════════════════════════════════════════════════════════
+function nexusGetStorageInfo(){
+  var lsSize=0;try{lsSize=JSON.stringify(localStorage).length;}catch(e){}
+  var taskCount=nexusTasks.length;
+  var kraCount=Object.keys(nexusKraScores).length;
+  var rcaCount=Object.keys(RCA_DATA||{}).length;
+  var attrCount=Object.keys(ATTR_DATA||{}).length;
+  return {
+    localStorage: {size:Math.round(lsSize/1024)+'KB', tasks:taskCount, kraScores:kraCount},
+    indexedDB: 'Active (lossiq_v4 + nexus_tasks_v2 + nexus_kra_scores_v2)',
+    rca: rcaCount+' entries (IDB + LS backup)',
+    attr: attrCount+' entries (IDB + LS backup)',
+    retention: '365 days minimum',
+    dataLoss: 'Protected against: page refresh, cache clear (IDB), localStorage clear (IDB fallback)'
+  };
+}
+function nexusShowStorageStatus(){
+  var info=nexusGetStorageInfo();
+  showToast('Storage: '+info.localStorage.tasks+' tasks · '+info.localStorage.kraScores+' KRA scores · RCA: '+info.rca,'💾');
+}
+function refreshTaskKPIs(){
+  var today = new Date().toDateString();
+  var totalUsers = NEXUS_USERS.length - 1; // exclude superadmin
+  var loggedToday = JSON.parse(localStorage.getItem('nx_login_log')||'[]')
+    .filter(function(l){ return new Date(l.time).toDateString()===today; })
+    .reduce(function(s,l){ return s.add(l.mobile||l.name); }, new Set()).size;
+  var active   = nexusTasks.filter(function(t){ return t.status!=='Completed'; }).length;
+  var inprog   = nexusTasks.filter(function(t){ return t.status==='In Progress'; }).length;
+  var done     = nexusTasks.filter(function(t){ return t.status==='Completed'; }).length;
+  var reassign = nexusTasks.filter(function(t){ return t.reassigned; }).length;
+  function sv(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  sv('kpiTotalUsers', totalUsers);
+  sv('kpiLoggedToday', loggedToday);
+  sv('kpiActiveTasks', active);
+  sv('kpiInProgress', inprog);
+  sv('kpiCompleted', done);
+  sv('kpiReassigned', reassign);
+}
+
+// ════════════════════════════════════════════════════════
+// TASK REASSIGN & RESCHEDULE
+// ════════════════════════════════════════════════════════
+function showReassignModal(taskId){
+  var task = nexusTasks.find(function(t){ return t.id===taskId; });
+  if(!task){ showToast('Task not found','⚠️'); return; }
+  // Build modal inline
+  var modal = document.getElementById('taskActionModal');
+  if(!modal){
+    modal = document.createElement('div');
+    modal.id = 'taskActionModal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center';
+    document.body.appendChild(modal);
+  }
+  var assignOptions = NEXUS_USERS.filter(function(u){ return u.designation!=='superadmin'; })
+    .map(function(u){ return '<option value="'+u.name+'"'+(u.name===task.assignee?' selected':'')+'>'+u.name+'</option>'; }).join('');
+  modal.innerHTML = '<div style="background:var(--bg-card,#0d1f35);border:1px solid rgba(0,200,255,.4);border-radius:14px;padding:28px;width:min(480px,95vw);box-shadow:0 0 60px rgba(0,200,255,.15)">'
+    +'<div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:1.1rem;color:#00e5ff;margin-bottom:16px">⚙️ Task Actions: '+task.title+'</div>'
+    +'<div style="margin-bottom:14px"><div style="font-size:.7rem;color:#8aaac8;font-weight:700;letter-spacing:1px;margin-bottom:5px">REASSIGN TO</div>'
+    +'<select id="modalReassignTo" style="width:100%;background:#0a1828;border:1px solid rgba(0,200,255,.2);border-radius:7px;padding:9px 12px;color:#eef2ff;font-size:.85rem">'
+    +assignOptions+'</select></div>'
+    +'<div style="margin-bottom:14px"><div style="font-size:.7rem;color:#8aaac8;font-weight:700;letter-spacing:1px;margin-bottom:5px">RESCHEDULE DUE DATE</div>'
+    +'<input type="datetime-local" id="modalReschedule" value="'+(task.due||'')+'" style="width:100%;background:#0a1828;border:1px solid rgba(0,200,255,.2);border-radius:7px;padding:9px 12px;color:#eef2ff;font-size:.85rem"/></div>'
+    +'<div style="margin-bottom:14px"><div style="font-size:.7rem;color:#8aaac8;font-weight:700;letter-spacing:1px;margin-bottom:5px">ACTION / REMARKS</div>'
+    +'<textarea id="modalRemarks" placeholder="Add action taken or reason for reassign..." style="width:100%;background:#0a1828;border:1px solid rgba(0,200,255,.2);border-radius:7px;padding:9px 12px;color:#eef2ff;font-size:.82rem;min-height:80px;resize:vertical"></textarea></div>'
+    +'<div style="margin-bottom:14px"><div style="font-size:.7rem;color:#8aaac8;font-weight:700;letter-spacing:1px;margin-bottom:5px">STATUS</div>'
+    +'<select id="modalStatus" style="width:100%;background:#0a1828;border:1px solid rgba(0,200,255,.2);border-radius:7px;padding:9px 12px;color:#eef2ff;font-size:.85rem">'
+    +'<option value="">— Keep current —</option>'
+    +'<option value="Inbox">Inbox</option><option value="In Progress">In Progress</option>'
+    +'<option value="Completed">Completed</option></select></div>'
+    +'<div style="display:flex;gap:10px;justify-content:flex-end">'
+    +'<button onclick="applyTaskActions('+taskId+')" style="background:linear-gradient(135deg,#00c8ff,#00e5ff);border:none;border-radius:8px;padding:10px 22px;color:#fff;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;letter-spacing:.5px">APPLY</button>'
+    +'<button data-action="closemodal" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 18px;color:#8aaac8;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">CANCEL</button>'
+    +'</div></div>';
+  modal.style.display='flex';
+}
+
+
+document.addEventListener('click', function(e){
+  if(e.target && e.target.id==='taskModalCancelBtn') closeTaskActionModal();
+});
+function closeTaskActionModal(){var m=document.getElementById("taskActionModal");if(m)m.style.display="none";}
+document.addEventListener('click',function(e){if(e.target&&e.target.getAttribute&&e.target.getAttribute('data-action')==='closemodal')closeTaskActionModal();});
+function applyTaskActions(taskId){
+  var task = nexusTasks.find(function(t){ return t.id===taskId; });
+  if(!task) return;
+  var newAssignee = (document.getElementById('modalReassignTo')||{value:''}).value;
+  var newDue      = (document.getElementById('modalReschedule')||{value:''}).value;
+  var remarks     = (document.getElementById('modalRemarks')||{value:''}).value.trim();
+  var newStatus   = (document.getElementById('modalStatus')||{value:''}).value;
+  var changed     = [];
+  if(newAssignee && newAssignee !== task.assignee){
+    // record reassign
+    if(!task.reassignHistory) task.reassignHistory=[];
+    task.reassignHistory.push({from:task.assignee,to:newAssignee,by:nexusCurrentUser?nexusCurrentUser.name:'',at:new Date().toISOString(),remarks:remarks});
+    task.previousAssignee = task.assignee;
+    task.assignee = newAssignee;
+    if(task.assignees) task.assignees = [newAssignee];
+    task.reassigned = true;
+    changed.push('Reassigned → '+newAssignee);
+    nexusAddNotification({type:'task_assigned',title:'[Reassigned] '+task.title,assignees:[newAssignee],from:nexusCurrentUser?nexusCurrentUser.name:'Admin',time:new Date().toISOString()});
+  }
+  if(newDue && newDue !== task.due){
+    task.previousDue = task.due;
+    task.due = newDue;
+    changed.push('Rescheduled → '+newDue.replace('T',' '));
+  }
+  if(remarks){
+    if(!task.actionLog) task.actionLog=[];
+    task.actionLog.push({by:nexusCurrentUser?nexusCurrentUser.name:'',at:new Date().toISOString(),remarks:remarks});
+  }
+  if(newStatus && newStatus!==task.status){
+    task.status = newStatus;
+    if(newStatus==='Completed') task.completedAt=new Date().toISOString();
+    changed.push('Status → '+newStatus);
+  }
+  task.updatedAt = new Date().toISOString();
+  saveTasks();
+  var modal=document.getElementById('taskActionModal'); if(modal) modal.style.display='none';
+  renderMyTasks(); renderAdminTaskBoard(); renderTaskInbox(); renderTaskArchive();
+  showToast(changed.length?changed.join(' · '):'No changes applied','✅');
+}
+function saveTasks(){
+  var payload = {tasks: nexusTasks, replies: nexusTaskReplies, savedAt: new Date().toISOString()};
+  // LocalStorage (instant, ~5MB limit)
+  try {
+    localStorage.setItem('nexusTasks', JSON.stringify(nexusTasks));
+    localStorage.setItem('nexusTaskReplies', JSON.stringify(nexusTaskReplies));
+  } catch(e) { console.warn('[Tasks] LS save failed:', e); }
+  // IndexedDB (persistent, larger capacity — survives cache clears)
+  if(typeof idbPut==='function'){
+    idbPut('nexus_tasks_v2', payload).catch(function(e){ console.warn('[Tasks] IDB save failed:', e); });
+  }
+  refreshTaskKPIs();
+}
+async function loadTasksFromIDB(){
+  if(typeof idbGet!=='function') return;
+  try {
+    var stored = await idbGet('nexus_tasks_v2');
+    if(stored && stored.tasks && stored.tasks.length) {
+      if(!nexusTasks.length) nexusTasks = stored.tasks;
+      if(stored.replies) Object.assign(nexusTaskReplies, stored.replies);
+      // Save back to localStorage for fast access
+      localStorage.setItem('nexusTasks', JSON.stringify(nexusTasks));
+      localStorage.setItem('nexusTaskReplies', JSON.stringify(nexusTaskReplies));
+    }
+  } catch(e) { console.warn('[Tasks] IDB load failed:', e); }
+}
+
+function createNewTask(){
+  var titleEl = document.getElementById('adminTaskTitle') || document.getElementById('newTaskTitle');
+  var priorityEl = document.getElementById('adminTaskPriority') || document.getElementById('newTaskPriority');
+  var dueEl = document.getElementById('adminTaskDue') || document.getElementById('newTaskDue');
+  var zoneEl = document.getElementById('adminTaskZone') || document.getElementById('newTaskZone');
+  var descEl = document.getElementById('adminTaskDesc') || document.getElementById('newTaskDesc');
+  var locEl = document.getElementById('adminTaskLoc');
+
+  var title = titleEl ? titleEl.value.trim() : '';
+  if(!title){showToast('Enter task title','⚠️');return;}
+
+  // Multi-assignee support
+  var myRole = nexusCurrentUser ? nexusCurrentUser.designation : '';
+  var autoSelf = myRole === 'area_manager';
+  var assignees = [];
+  if(autoSelf){
+    assignees = [nexusCurrentUser ? nexusCurrentUser.name : ''];
+  } else {
+    // Try multiselect first
+    var msArr = typeof getMS==='function' ? getMS('adminTaskAssignee') : [];
+    if(msArr.length){
+      assignees = msArr;
+    } else {
+      var assigneeEl = document.getElementById('adminTaskAssignee');
+      var v = assigneeEl ? assigneeEl.value : '';
+      if(v) assignees = [v];
+    }
+  }
+  if(!assignees.length){showToast('Select at least one assignee','⚠️');return;}
+
+  var task = {
+    id: Date.now(),
+    title: title,
+    assignee: assignees[0],          // primary (backward compat)
+    assignees: assignees,             // all assignees
+    priority: priorityEl ? priorityEl.value : 'MEDIUM',
+    due: dueEl ? dueEl.value : '',
+    zone: zoneEl ? zoneEl.value : 'All',
+    location: locEl ? locEl.value : '',
+    description: descEl ? descEl.value : '',
+    createdBy: nexusCurrentUser ? nexusCurrentUser.name : 'Admin',
+    createdAt: new Date().toISOString(),
+    status: 'Inbox',
+    completedAt: null,
+    replies: []
+  };
+  nexusTasks.unshift(task);
+  saveTasks();
+
+  // Push notification to all assignees + all admins
+  nexusAddNotification({
+    type:'task_assigned',
+    taskId: task.id,
+    title: task.title,
+    assignees: assignees,
+    from: nexusCurrentUser ? nexusCurrentUser.name : 'Admin',
+    time: new Date().toISOString()
+  });
+
+  if(titleEl) titleEl.value='';
+  if(descEl) descEl.value='';
+  if(typeof resetMS==='function') resetMS('adminTaskAssignee');
+  renderAdminTaskBoard();
+  renderMyTasks();
+  renderTaskInbox();
+  nexusRenderNotifPanel();
+  document.getElementById('createTaskModal') && (document.getElementById('createTaskModal').style.display='none');
+  showToast('Task assigned to: '+assignees.join(', '),'✅');
+}
+
+function renderTaskInbox(){
+  var inboxList = document.getElementById('taskInboxList');
+  if(!inboxList) return;
+  var myName = nexusCurrentUser ? nexusCurrentUser.name : '';
+  var role = nexusCurrentUser ? nexusCurrentUser.designation : '';
+  var isAdmin = ['superadmin','regional_head','cluster_head'].includes(role);
+  // Only show tasks assigned to current user or all if admin
+  var myTasks = nexusTasks.filter(function(t){
+    if(t.status!=='Inbox') return false;
+    if(isAdmin) return true;
+    // Check both single and multi-assignee
+    if(t.assignees && Array.isArray(t.assignees)) return t.assignees.includes(myName);
+    return t.assignee===myName;
+  });
+  // Keep existing demo tasks if no stored tasks
+  if(myTasks.length===0) return;
+  inboxList.innerHTML = myTasks.map(function(t){
+    return '<div class="task-card" onclick="showTaskDetail('+t.id+')" style="border-color:rgba('+(t.priority==='HIGH'?'255,51,102':t.priority==='MEDIUM'?'255,215,0':'0,200,255')+',0.4)">'
+      +'<div class="task-card-title">'+t.title+'</div>'
+      +'<div class="task-card-meta">Assigned to: '+t.assignee+' · Priority: '+t.priority+(t.due?' · Due: '+new Date(t.due).toLocaleDateString('en-IN'):'')+'</div>'
+      +'<div class="task-timer-display">⏱ Click to view details</div>'
+    +'</div>';
+  }).join('');
+  refreshTaskKPIs();
+}
+
+function renderMyTasks(){
+  var myTasksList = document.getElementById('myTasksList');
+  if(!myTasksList) return;
+  var myName = nexusCurrentUser ? nexusCurrentUser.name : '';
+  var myTasks = nexusTasks.filter(function(t){
+    // Check both single assignee and multi-assignees array
+    if(t.assignees && Array.isArray(t.assignees)) return t.assignees.includes(myName);
+    return t.assignee===myName;
+  });
+  myTasksList.innerHTML = '';
+  if(!myTasks.length){
+    myTasksList.innerHTML='<div class="empty-state"><div class="empty-icon">&#x1F4CB;</div><div>No tasks assigned to you yet</div></div>';
+    return;
+  }
+  myTasks.forEach(function(t){
+    var replies = nexusTaskReplies[t.id] || [];
+    var statusColor = t.status==='Completed'?'var(--accent-green)':t.status==='In Progress'?'var(--accent-yellow)':'var(--accent-blue)';
+    var sBadge = t.status==='Completed'?'badge-green':t.status==='In Progress'?'badge-yellow':'badge-blue';
+    var dueStr = t.due ? ' &middot; Due: '+new Date(t.due).toLocaleDateString() : '';
+    var descStr = t.description ? ' &middot; '+t.description.substring(0,60)+'...' : '';
+    var repStr = replies.length ? '<div style="margin-top:8px;font-size:11px;color:var(--text-muted);">&#x1F4AC; '+replies.length+' update(s)</div>' : '';
+    var wrap = document.createElement('div');
+    wrap.style.cssText='background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px;border-left:3px solid '+statusColor+';margin-bottom:10px;';
+    wrap.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+      +'<div style="font-weight:700;color:var(--text-primary)">'+t.title+'</div>'
+      +'<span class="badge '+sBadge+'">'+t.status+'</span>'
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--text-muted);">Priority: '+t.priority+dueStr+descStr+'</div>'
+      +repStr
+      +'<div style="margin-top:10px;display:flex;gap:8px;" class="task-action-row"></div>';
+    var btnRow = wrap.querySelector('.task-action-row');
+    if(t.status!=='In Progress' && t.status!=='Completed'){
+      var btnStart = document.createElement('button');
+      btnStart.className='btn-save-kra';
+      btnStart.textContent='▶ START';
+      btnStart.onclick=(function(tid){return function(){updateTaskStatus(tid,'In Progress');};})(t.id);
+      btnRow.appendChild(btnStart);
+    }
+    if(t.status!=='Completed'){
+      var btnDone = document.createElement('button');
+      btnDone.className='btn-save-kra';
+      btnDone.style.color='var(--accent-green)';
+      btnDone.textContent='✅ COMPLETE';
+      btnDone.onclick=(function(tid){return function(){updateTaskStatus(tid,'Completed');};})(t.id);
+      btnRow.appendChild(btnDone);
+    }
+    var btnView = document.createElement('button');
+    btnView.className='btn-save-kra';
+    btnView.textContent='💬 VIEW / REPLY';
+    btnView.onclick=(function(tid){return function(){showTaskDetail(tid);};})(t.id);
+    btnRow.appendChild(btnView);
+    myTasksList.appendChild(wrap);
+  });
+}
+
+function updateTaskStatus(taskId, newStatus){
+  var task = nexusTasks.find(function(t){return t.id===taskId;});
+  if(!task) return;
+  task.status = newStatus;
+  if(newStatus==='Completed') task.completedAt = new Date().toISOString();
+  saveTasks();
+  renderMyTasks();
+  renderAdminTaskBoard();
+  renderTaskArchive();
+  showToast('Task status: '+newStatus,'✅');
+}
+
+function renderAdminTaskBoard(){
+  var body = document.getElementById('adminTaskBody');
+  if(!body) return;
+  var cnt = document.getElementById('adminTaskCount');
+  if(cnt) cnt.textContent='('+nexusTasks.length+')';
+  if(!nexusTasks.length){
+    body.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-muted);">No tasks created yet</td></tr>';
+    return;
+  }
+  body.innerHTML = nexusTasks.map(function(t,i){
+    var replies = nexusTaskReplies[t.id]||[];
+    var pColor = t.priority==='HIGH'?'badge-red':t.priority==='MEDIUM'?'badge-yellow':'badge-blue';
+    var sColor = t.status==='Completed'?'badge-green':t.status==='In Progress'?'badge-yellow':'badge-blue';
+    var assigneeStr = t.assignees&&t.assignees.length>0?t.assignees.join(', '):t.assignee;
+    return '<tr><td>'+(i+1)+'</td><td><b>'+t.title+'</b></td><td>'+t.assignee+'</td>'
+      +'<td>'+t.zone+'</td>'
+      +'<td><span class="badge '+pColor+'">'+t.priority+'</span></td>'
+      +'<td style="font-size:11px">'+(t.due?new Date(t.due).toLocaleDateString('en-IN'):'-')+'</td>'
+      +'<td><span class="badge '+sColor+'">'+t.status+'</span></td>'
+      +'<td>'+replies.length+'</td>'
+      +'<td><button class="btn-save-kra" onclick="showTaskDetail('+t.id+')">VIEW</button> '
+      +'<button class="btn-save-kra" onclick="showReassignModal('+t.id+')" style="color:var(--accent-blue);margin-right:4px">⚙ ACT</button>'
+      +'<button class="btn-save-kra" onclick="deleteTask('+t.id+')" style="color:var(--accent-red)">DEL</button></td></tr>';
+  }).join('');
+}
+
+function deleteTask(taskId){
+  if(!confirm('Delete this task?')) return;
+  nexusTasks = nexusTasks.filter(function(t){return t.id!==taskId;});
+  saveTasks();
+  renderAdminTaskBoard();
+  renderMyTasks();
+  showToast('Task deleted','🗑');
+}
+
+function renderTaskArchive(){
+  var body = document.getElementById('archBody');
+  if(!body) return;
+  var zone = (document.getElementById('archZone')||{value:''}).value;
+  var search = ((document.getElementById('archSearch')||{value:''}).value||'').toLowerCase();
+  var statusFilter = (document.getElementById('archStatus')||{value:''}).value || '';
+  var myName = nexusCurrentUser ? nexusCurrentUser.name : '';
+  var role = nexusCurrentUser ? nexusCurrentUser.designation : '';
+  var isAdmin = ['superadmin','regional_head','cluster_head'].includes(role);
+  // 1-year cutoff
+  var cutoff = new Date(); cutoff.setFullYear(cutoff.getFullYear()-1);
+  var archived = nexusTasks.filter(function(t){
+    // Visibility: admins see all; others see their own
+    if(!isAdmin){
+      var inAssignees = t.assignees&&Array.isArray(t.assignees)?t.assignees.includes(myName):t.assignee===myName;
+      if(!inAssignees && t.createdBy!==myName) return false;
+    }
+    // Date filter — last 1 year
+    if(new Date(t.createdAt) < cutoff) return false;
+    // Zone filter
+    if(zone && t.zone!==zone) return false;
+    // Status filter (admins can see all; default show all)
+    if(statusFilter && t.status!==statusFilter) return false;
+    // Search
+    if(search && !(t.title||'').toLowerCase().includes(search) && !(t.assignee||'').toLowerCase().includes(search) && !((t.assignees||[]).join(' ')).toLowerCase().includes(search)) return false;
+    return true;
+  });
+  body.innerHTML = archived.length ? archived.map(function(t,i){
+    var assigneeStr = t.assignees&&t.assignees.length ? t.assignees.join(', ') : t.assignee;
+    var pColor = t.priority==='HIGH'?'badge-red':t.priority==='MEDIUM'?'badge-yellow':'badge-blue';
+    var sColor = t.status==='Completed'?'badge-green':t.status==='Inbox'?'badge-blue':'badge-yellow';
+    return '<tr style="cursor:pointer" onclick="showTaskDetail('+t.id+')">'
+      +'<td>'+(i+1)+'</td>'
+      +'<td><div style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.title+'</div>'
+      +(t.description?'<div style="font-size:.68rem;color:#8aaac8;margin-top:2px">'+t.description.slice(0,60)+'...</div>':'')+'</td>'
+      +'<td style="font-size:.75rem">'+assigneeStr+'</td>'
+      +'<td><span class="badge '+pColor+'">'+t.priority+'</span></td>'
+      +'<td><span class="badge '+sColor+'">'+t.status+'</span></td>'
+      +'<td style="font-size:.72rem">'+t.zone+'</td>'
+      +'<td style="font-size:.72rem">'+t.createdBy+'</td>'
+      +'<td style="font-size:.72rem">'+(t.due?new Date(t.due).toLocaleDateString('en-IN'):'—')+'</td>'
+      +'<td style="font-size:.72rem">'+(t.completedAt?new Date(t.completedAt).toLocaleDateString('en-IN'):'—')+'</td>'
+      +'</tr>';
+  }).join('') : '<tr><td colspan="9" style="text-align:center;padding:24px;color:#4a6680">No archived tasks found</td></tr>';
+}
+
+function showTaskListDetail(listId, listName){
+  // Count click on header — show popup with task list
+  var list = document.getElementById(listId);
+  if(!list) return;
+  var cards = list.querySelectorAll('.task-card');
+  if(!cards.length){showToast('No tasks in '+listName,'ℹ️');return;}
+  var names = Array.from(cards).map(function(c){
+    return (c.querySelector('.task-card-title')||{textContent:''}).textContent;
+  });
+  var body = document.getElementById('taskDetailBody');
+  var title = document.getElementById('taskDetailTitle');
+  if(body) body.innerHTML = '<b>'+listName+' ('+cards.length+')</b><ul style="margin-top:10px;padding-left:20px;">'
+    +names.map(function(n){return '<li style="margin-bottom:6px;">'+n+'</li>';}).join('')+'</ul>';
+  if(title) title.textContent=listName+' Tasks';
+  document.getElementById('taskDetailModal').style.display='flex';
+}
+
+function showTaskDetail(taskId){
+  var task = nexusTasks.find(function(t){return t.id===taskId;});
+  var modal = document.getElementById('taskDetailModal');
+  if(!task||!modal) return;
+  var replies = nexusTaskReplies[taskId]||[];
+  var body = document.getElementById('taskDetailBody');
+  var title = document.getElementById('taskDetailTitle');
+  if(title) title.textContent = task.title;
+  if(body){
+    var repHtml = replies.length
+      ? '<div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;"><b style="color:var(--accent-cyan)">💬 Updates:</b>'
+        +replies.map(function(r){return '<div style="margin-top:8px;background:rgba(255,255,255,0.03);border-radius:6px;padding:8px;"><div style="font-size:11px;color:var(--text-muted)">'+r.by+' · '+new Date(r.at).toLocaleString('en-IN')+'</div><div style="margin-top:4px;">'+r.text+'</div></div>';}).join('')+'</div>'
+      : '';
+    body.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">'
+      +'<div><span style="color:var(--text-muted);font-size:11px;">Assigned To</span><div style="font-weight:700;">'+task.assignee+'</div></div>'
+      +'<div><span style="color:var(--text-muted);font-size:11px;">Status</span><div><span class="badge '+(task.status==='Completed'?'badge-green':task.status==='In Progress'?'badge-yellow':'badge-blue')+'">'+task.status+'</span></div></div>'
+      +'<div><span style="color:var(--text-muted);font-size:11px;">Priority</span><div><span class="badge '+(task.priority==='HIGH'?'badge-red':task.priority==='MEDIUM'?'badge-yellow':'badge-blue')+'">'+task.priority+'</span></div></div>'
+      +'<div><span style="color:var(--text-muted);font-size:11px;">Due</span><div>'+(task.due?new Date(task.due).toLocaleString('en-IN'):'-')+'</div></div>'
+      +'<div><span style="color:var(--text-muted);font-size:11px;">Zone</span><div>'+task.zone+'</div></div>'
+      +'<div><span style="color:var(--text-muted);font-size:11px;">Created By</span><div>'+task.createdBy+'</div></div>'
+      +'</div>'
+      +(task.description?'<div style="background:rgba(255,255,255,0.03);border-radius:6px;padding:10px;margin-bottom:8px;">'+task.description+'</div>':'')
+      +repHtml;
+  }
+  modal.dataset.taskId = taskId;
+  document.getElementById('taskReplyArea').style.display='none';
+  modal.style.display='flex';
+}
+
+function replyToTask(){
+  var ra = document.getElementById('taskReplyArea');
+  if(ra) ra.style.display=(ra.style.display==='none'?'block':'none');
+}
+
+function submitTaskReply(){
+  var modal = document.getElementById('taskDetailModal');
+  var taskId = parseInt(modal.dataset.taskId||0);
+  var text = (document.getElementById('taskReplyText')||{value:''}).value.trim();
+  if(!text){showToast('Enter reply text','⚠️');return;}
+  if(!nexusTaskReplies[taskId]) nexusTaskReplies[taskId]=[];
+  nexusTaskReplies[taskId].push({
+    by: nexusCurrentUser ? nexusCurrentUser.name : 'User',
+    at: new Date().toISOString(),
+    text: text
+  });
+  saveTasks();
+  document.getElementById('taskReplyText').value='';
+  showTaskDetail(taskId);
+  showToast('Reply submitted','💬');
+}
+
+// ── TEAM DIRECTORY ──
+function renderTeamDirectory(){
+  var body = document.getElementById('tdBody');
+  if(!body) return;
+  var zone = (document.getElementById('tdZone')||{value:''}).value;
+  var role = (document.getElementById('tdRole')||{value:''}).value;
+  var search = ((document.getElementById('tdSearch')||{value:''}).value||'').toLowerCase();
+  var users = NEXUS_USERS.filter(function(u){
+    return (!zone || (u.zone||'').toLowerCase()===zone.toLowerCase()) &&
+           (!role || (u.designation||'').toLowerCase()===role.toLowerCase()) &&
+           (!search || (u.name+u.email+u.mobile).toLowerCase().includes(search));
+  });
+  var cnt = document.getElementById('tdCount');
+  if(cnt) cnt.textContent='('+users.length+' members)';
+  body.innerHTML = users.map(function(u,i){
+    var desig = (u.designation||'').replace(/_/g,' ').toUpperCase();
+    var dColor = u.designation==='superadmin'?'badge-red':u.designation==='regional_head'?'badge-orange':u.designation==='cluster_head'?'badge-yellow':'badge-blue';
+    return '<tr><td>'+(i+1)+'</td><td><b>'+u.name+'</b></td>'
+      +'<td><span class="badge '+dColor+'">'+desig+'</span></td>'
+      +'<td>'+u.zone+'</td>'
+      +'<td style="font-size:11px;">'+u.email+'</td>'
+      +'<td style="font-family:monospace;">'+u.mobile+'</td>'
+      +'<td><span class="badge badge-green">Active</span></td>'
+      +'<td><button class="btn-save-kra" data-mobile="'+u.mobile+'" onclick="callMember(this.dataset.mobile)">&#128222; CALL</button></td></tr>';
+  }).join('')||'<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">No members found</td></tr>';
+}
+
+function callMember(mobile){showToast('Calling '+mobile,'📞');}
+
+function showAddMemberForm(){
+  var form = document.getElementById('addMemberForm');
+  if(form) form.style.display=(form.style.display==='none'?'block':'none');
+}
+
+function addTeamMember(){
+  var name=(document.getElementById('tdNewName')||{value:''}).value.trim();
+  var email=(document.getElementById('tdNewEmail')||{value:''}).value.trim();
+  var mobile=(document.getElementById('tdNewMobile')||{value:''}).value.trim();
+  var role=(document.getElementById('tdNewRole')||{value:'area_manager'}).value;
+  var zone=(document.getElementById('tdNewZone')||{value:'South'}).value;
+  var pwd=(document.getElementById('tdNewPwd')||{value:'Pass@123'}).value||'Pass@123';
+  if(!name||!mobile){showToast('Enter name and mobile','⚠️');return;}
+  var newUser={name:name,email:email,mobile:mobile,designation:role,zone:zone,password:pwd};
+  NEXUS_USERS.push(newUser);
+  localStorage.setItem('nexusExtraUsers',JSON.stringify(NEXUS_USERS.slice(4)));
+  renderTeamDirectory();
+  populateAssigneeDropdowns();
+  showToast('Member added: '+name,'✅');
+  document.getElementById('addMemberForm').style.display='none';
+}
+
+
+// ── TASK ACCESS CONTROL (based on sheet2 hierarchy) ──
+function getAssignableUsers(){
+  var role = nexusCurrentUser ? nexusCurrentUser.designation : '';
+  var myName = nexusCurrentUser ? nexusCurrentUser.name : '';
+  
+  if(role === 'superadmin') {
+    // SuperAdmin: everyone
+    return NEXUS_USERS.filter(function(u){return u.designation !== 'superadmin';}).map(function(u){return u.name;});
+  }
+  
+  if(role === 'regional_head') {
+    // RH can assign to: their CHs and those CHs' AMs (per sheet2)
+    var myRow = nexusKraData.sheet2.find(function(r){
+      return (r['Regional Head']||'').toLowerCase() === myName.toLowerCase() ||
+             (r['Regional Head Mail id']||'').toLowerCase() === (nexusCurrentUser.email||'').toLowerCase();
+    });
+    var names = new Set();
+    nexusKraData.sheet2.filter(function(r){
+      return (r['Regional Head']||'').toLowerCase() === myName.toLowerCase();
+    }).forEach(function(r){
+      if(r['Cluster Head']) names.add(r['Cluster Head']);
+      if(r['Area Manager 1']) names.add(r['Area Manager 1']);
+      if(r['Area Manager 2']) names.add(r['Area Manager 2']);
+      if(r['Area Manager 3']) names.add(r['Area Manager 3']);
+    });
+    if(!names.size){
+      // Fallback: all non-superadmin users
+      NEXUS_USERS.forEach(function(u){if(u.designation!=='superadmin') names.add(u.name);});
+    }
+    return [...names].filter(Boolean);
+  }
+  
+  if(role === 'cluster_head') {
+    // CH can assign to: their AMs (per sheet2)
+    var names2 = new Set();
+    nexusKraData.sheet2.filter(function(r){
+      return (r['Cluster Head']||'').toLowerCase() === myName.toLowerCase();
+    }).forEach(function(r){
+      if(r['Area Manager 1']) names2.add(r['Area Manager 1']);
+      if(r['Area Manager 2']) names2.add(r['Area Manager 2']);
+      if(r['Area Manager 3']) names2.add(r['Area Manager 3']);
+    });
+    // Also add self
+    names2.add(myName);
+    if(names2.size <= 1){
+      // Fallback: AMs in same zone
+      NEXUS_USERS.filter(function(u){return u.designation==='area_manager' && u.zone===nexusCurrentUser.zone;})
+        .forEach(function(u){names2.add(u.name);});
+    }
+    return [...names2].filter(Boolean);
+  }
+  
+  // area_manager: can only assign to self
+  return [myName];
+}
+
+
+// ════════════════════════════════════════════
+// KRA SCORE FILTER CASCADE: Zone → CH → AM
+// ════════════════════════════════════════════
+function nexusKraCascadeInit(){
+  var zones=[...new Set((nexusKraData.sheet2||[]).map(function(r){return r.Zone||r.zone||'';}).filter(Boolean))].sort();
+  var chs=[...new Set((nexusKraData.sheet2||[]).map(function(r){return r['Cluster Head']||'';}).filter(Boolean))].sort();
+  var zEl=document.getElementById('kraScoreZone');
+  if(zEl&&zEl.options.length<=1)zones.forEach(function(z){var o=document.createElement('option');o.value=z;o.textContent=z;zEl.appendChild(o);});
+  var cEl=document.getElementById('kraScoreCH');
+  if(cEl&&cEl.options.length<=1)chs.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;cEl.appendChild(o);});
+  nexusKraFilterCascade();
+}
+
+function nexusKraFilterCascade(){
+  var zone=(document.getElementById('kraScoreZone')||{value:''}).value;
+  var ch=(document.getElementById('kraScoreCH')||{value:''}).value;
+  var role=nexusCurrentUser?nexusCurrentUser.designation:'';
+  var myName=nexusCurrentUser?nexusCurrentUser.name:'';
+  var myRole=nexusCurrentUser?nexusCurrentUser.designation:'';
+
+  // Filter CHs by zone
+  var chEl=document.getElementById('kraScoreCH');
+  if(chEl){
+    var allCHs=[...new Set((nexusKraData.sheet2||[]).filter(function(r){return !zone||(r.Zone||r.zone||'')==zone;}).map(function(r){return r['Cluster Head']||'';}).filter(Boolean))].sort();
+    var curCH=chEl.value;
+    chEl.innerHTML='<option value="">All CHs</option>';
+    allCHs.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;if(c===curCH)o.selected=true;chEl.appendChild(o);});
+  }
+
+  // Filter persons by zone+CH, respecting role
+  var personEl=document.getElementById('kraScorePerson');
+  if(personEl){
+    var persons=[];
+    if(myRole==='cluster_head'){
+      // CH can only score their own AMs
+      persons=(nexusKraData.sheet2||[]).filter(function(r){
+        return (r['Cluster Head']||'')===myName;
+      }).map(function(r){return r.Name||r.name||'';}).filter(Boolean);
+    } else if(myRole==='regional_head'){
+      // RH can score CHs and AMs in their zone
+      var myZone=(nexusKraData.sheet2||[]).find(function(r){return (r['Regional Head']||r['RH']||'')===myName;})||{};
+      var rhZone=myZone.Zone||myZone.zone||zone;
+      persons=getAssignableUsers().filter(function(n){
+        var u=NEXUS_USERS.find(function(u2){return u2.name===n;});
+        return u&&(!rhZone||(u.zone||'')==rhZone);
+      });
+    } else {
+      // Superadmin: all, filtered by zone and CH
+      persons=(nexusKraData.sheet2||[]).filter(function(r){
+        if(zone&&(r.Zone||r.zone||'')!==zone)return false;
+        if(ch&&(r['Cluster Head']||'')!==ch)return false;
+        return true;
+      }).map(function(r){return r.Name||r.name||'';}).filter(Boolean);
+      // Also add persons from NEXUS_USERS not in sheet2
+      if(!persons.length) persons=getAssignableUsers();
+    }
+    var curP=personEl.value;
+    personEl.innerHTML='<option value="">Select Person</option>';
+    [...new Set(persons)].sort().forEach(function(p){
+      var o=document.createElement('option');o.value=p;o.textContent=p;if(p===curP)o.selected=true;personEl.appendChild(o);
+    });
+  }
+}
+
+function populateAssigneeDropdowns(){
+  var assignable = getAssignableUsers();
+  // Build multi-select for adminTaskAssignee
+  if(document.getElementById('adminTaskAssignee')&&typeof buildMS==='function'){
+    buildMS('adminTaskAssignee', assignable, 'Select Person(s)', null);
+  } else {
+    var opts='<option value="">Select Person</option>'+assignable.map(function(n){return '<option value="'+n+'">'+n+'</option>';}).join('');
+    ['adminTaskAssignee','newTaskAssignee'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  }
+  // Populate location dropdown with all sort codes
+  var locEl = document.getElementById('adminTaskLoc');
+  if(locEl && typeof SORT_CODES!=='undefined' && SORT_CODES.length){
+    var existing = locEl.options.length;
+    if(existing <= 1){
+      SORT_CODES.forEach(function(sc){
+        var o=document.createElement('option');
+        o.value=sc.code||sc.name;
+        o.textContent=(sc.code?sc.code+' - ':'')+sc.name+(sc.zone?' ('+sc.zone+')':'');
+        locEl.appendChild(o);
+      });
+    }
+  }
+  // KRA score persons
+  var kraRole = nexusCurrentUser ? nexusCurrentUser.designation : '';
+  var kraPersons = kraRole==='area_manager' ? [] : assignable;
+  var kraPersonEl = document.getElementById('kraScorePerson');
+  if(kraPersonEl){
+    kraPersonEl.innerHTML='<option value="">Select Person</option>'+kraPersons.map(function(n){return '<option>'+n+'</option>';}).join('');
+  }
+}
+
+
+// ── SORT CODE GITHUB LOAD ──
+async function loadSortCodesFromGH(){
+  var repo = 'Karthik221188/Nexusops-360';
+  var buf = await fetchGithubFile(repo, 'Sort code.xlsx');
+  if(!buf) { renderSortCodes(); return; }
+  var wb = XLSX.read(buf, {type:'array'});
+  var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+  if(rows.length){
+    SORT_CODES = rows.map(function(r){
+      return {
+        no: r['NO']||r['No']||'',
+        dcCode: r['DC CODE']||r['DC_CODE']||'',
+        code: r['SORT CODE']||r['Sort Code']||r['SORT_CODE']||'',
+        name: r['LOCATION']||r['Location']||'',
+        zone: r['ZONE']||r['Zone']||'',
+        type: r['TYPE']||r['Type']||'',
+        status: r['STATUS']||r['Status']||'ACTIVE'
+      };
+    });
+  }
+  renderSortCodes();
+  showToast('Sort codes loaded: '+SORT_CODES.length+' records','✅');
+}
+
+// ── ESCALATION MATRIX GITHUB LOAD ──
+var ESCALATION_DATA = [];
+async function loadEscalationMatrix(){
+  var repo = (document.getElementById('escGhInput')||{value:'Karthik221188/Nexusops-360'}).value.trim() || 'Karthik221188/Nexusops-360';
+  var dot = document.getElementById('escGhDot');
+  if(dot) dot.className='github-status-dot loading';
+  var buf = await fetchGithubFile(repo, 'Matrix.xlsx');
+  if(!buf){
+    if(dot) dot.className='github-status-dot error';
+    showToast('Matrix.xlsx not found in GitHub','⚠️');
+    return;
+  }
+  var wb = XLSX.read(buf, {type:'array'});
+  ESCALATION_DATA = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+  if(dot) dot.className='github-status-dot';
+  var ghRepo=document.getElementById('escGhRepo');
+  if(ghRepo) ghRepo.textContent=repo;
+  populateEscFilters();
+  filterEscMatrix();
+  showToast('Matrix loaded: '+ESCALATION_DATA.length+' locations','✅');
+}
+
+function populateEscFilters(){
+  var zones=[...new Set(ESCALATION_DATA.map(function(r){return r.ZONE||r.Zone||'';}))].filter(Boolean);
+  var types=[...new Set(ESCALATION_DATA.map(function(r){return r.TYPE||r.Type||'';}))].filter(Boolean);
+  var rhs=[...new Set(ESCALATION_DATA.map(function(r){return r.RH||r['Regional Head']||'';}))].filter(Boolean);
+  function fill(id,opts,def){var el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">'+def+'</option>'+opts.map(function(v){return'<option>'+v+'</option>';}).join('');}
+  fill('escZone',zones,'All Zones');fill('escType',types,'All Types');fill('escRH',rhs,'All RHs');
+}
+
+function filterEscMatrix(){
+  var zone=(document.getElementById('escZone')||{value:''}).value;
+  var type=(document.getElementById('escType')||{value:''}).value;
+  var rh=(document.getElementById('escRH')||{value:''}).value;
+  var search=((document.getElementById('escSearch')||{value:''}).value||'').toLowerCase();
+  var f=ESCALATION_DATA.filter(function(r){
+    var loc=String(r['LOCATION CODE']||r.LOCATION||r['Location Code']||'').toLowerCase();
+    return (!zone||(r.ZONE||r.Zone||'')=== zone)&&
+           (!type||(r.TYPE||r.Type||'')=== type)&&
+           (!rh||(r.RH||'')=== rh)&&
+           (!search||loc.includes(search)||(r.CH||'').toLowerCase().includes(search));
+  });
+  var cnt=document.getElementById('escCount');if(cnt) cnt.textContent='('+f.length+' records)';
+  var body=document.getElementById('escBody');
+  if(!body) return;
+  body.innerHTML = f.map(function(r,i){
+    return '<tr><td>'+(i+1)+'</td>'
+      +'<td><b style="font-family:monospace">'+(r['LOCATION CODE']||r.LOCATION||'-')+'</b></td>'
+      +'<td><span class="badge badge-blue">'+(r.ZONE||r.Zone||'-')+'</span></td>'
+      +'<td><span class="badge badge-yellow">'+(r.TYPE||r.Type||'-')+'</span></td>'
+      +'<td>'+(r.RH||'-')+'</td><td>'+(r.CH||'-')+'</td>'
+      +'<td>'+(r['AM1 NAME']||'-')+'</td><td style="font-family:monospace">'+(r['AM1 MOBILE']||'-')+'</td>'
+      +'<td>'+(r['AM2 NAME']||'-')+'</td><td style="font-family:monospace">'+(r['AM2 MOBILE']||'-')+'</td>'
+      +'<td>'+(r['PATNER 1 NAME']||r['PARTNER 1 NAME']||'-')+'</td><td style="font-family:monospace">'+(r['PATNER 1 MOBILE']||r['PARTNER 1 MOBILE']||'-')+'</td>'
+      +'<td>'+(r['PATNER 2 NAME']||r['PARTNER 2 NAME']||'-')+'</td><td style="font-family:monospace">'+(r['PATNER 2 MOBILE']||r['PARTNER 2 MOBILE']||'-')+'</td>'
+    +'</tr>';
+  }).join('')||'<tr><td colspan="14" style="text-align:center;padding:30px;color:var(--text-muted);">No data loaded yet. Load Matrix.xlsx from GitHub.</td></tr>';
+}
+
+// ── COMPLIANCE ──
+var COMPLIANCE_DATA = JSON.parse(localStorage.getItem('complianceData')||'[]');
+var COMP_CHARTS = {};
+
+function parseComplianceData(){
+  var raw = (document.getElementById('compPasteArea')||{value:''}).value.trim();
+  if(!raw){showToast('Paste data first','⚠️');return;}
+  var lines = raw.split('\n').filter(Boolean);
+  var headers = lines[0].split('\t').map(function(h){return h.trim();});
+  var rows = [];
+  for(var i=1;i<lines.length;i++){
+    var cols = lines[i].split('\t');
+    var obj={};
+    headers.forEach(function(h,j){obj[h]=cols[j]!==undefined?cols[j].trim():'';});
+    if(obj.date||obj.facility_1) rows.push(obj);
+  }
+  if(!rows.length){showToast('Could not parse data. Check format.','⚠️');return;}
+  COMPLIANCE_DATA = rows;
+  localStorage.setItem('complianceData',JSON.stringify(COMPLIANCE_DATA));
+  populateCompFilters();
+  renderCompliance();
+  showToast('Loaded '+rows.length+' compliance records','✅');
+}
+
+function clearComplianceData(){
+  if(!confirm('Clear all compliance data?')) return;
+  COMPLIANCE_DATA=[];
+  localStorage.setItem('complianceData','[]');
+  document.getElementById('compBody').innerHTML='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text-muted);">No data</td></tr>';
+  showToast('Cleared','🗑');
+}
+
+function populateCompFilters(){
+  var types=[...new Set(COMPLIANCE_DATA.map(function(r){return r.facility_Type||r['Facility Type']||'';}))].filter(Boolean);
+  var rhs=[...new Set(COMPLIANCE_DATA.map(function(r){return r.RH||'';}))].filter(Boolean);
+  function fill(id,opts,def){var el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">'+def+'</option>'+opts.map(function(v){return'<option>'+v+'</option>';}).join('');}
+  fill('compFacType',types,'All Types');fill('compRH',rhs,'All RH');
+}
+
+function parseFloat2(v){return parseFloat(String(v||'').replace('%','').trim())||0;}
+
+function renderCompliance(){
+  if(!COMPLIANCE_DATA.length){return;}
+  var date=(document.getElementById('compDate')||{value:''}).value;
+  var facType=(document.getElementById('compFacType')||{value:''}).value;
+  var rh=(document.getElementById('compRH')||{value:''}).value;
+  var search=((document.getElementById('compSearch')||{value:''}).value||'').toLowerCase();
+  var rcaData=JSON.parse(localStorage.getItem('compRCA')||'{}');
+  
+  var f=COMPLIANCE_DATA.filter(function(r){
+    return (!date||(r.date||'')===date)&&
+           (!facType||(r.facility_Type||r['Facility Type']||'')=== facType)&&
+           (!rh||(r.RH||'')=== rh)&&
+           (!search||(r.facility_1||'').toLowerCase().includes(search));
+  });
+  
+  var cnt=document.getElementById('compCount');if(cnt) cnt.textContent='('+f.length+' records)';
+  
+  // KPIs
+  var kpiEl=document.getElementById('compKPIs');
+  if(kpiEl&&f.length){
+    var avgConn=f.reduce(function(a,r){return a+parseFloat2(r['Connection - D0+ 30Min']||r['Connection']);},0)/f.length;
+    var avgBag=f.reduce(function(a,r){return a+parseFloat2(r['D0+ 30Min-bagging']||r['Bagging']);},0)/f.length;
+    var avgMat=f.reduce(function(a,r){return a+parseFloat2(r['Matured %']);},0)/f.length;
+    var fails=f.filter(function(r){return parseFloat2(r['Connection - D0+ 30Min']||r['Connection'])<98||parseFloat2(r['D0+ 30Min-bagging']||r['Bagging'])<98;}).length;
+    kpiEl.innerHTML=[
+      {label:'AVG CONNECTION D0+30',val:avgConn.toFixed(1)+'%',color:'var(--accent-cyan)'},
+      {label:'AVG BAGGING D0+30',val:avgBag.toFixed(1)+'%',color:'var(--accent-blue)'},
+      {label:'AVG MATURED %',val:avgMat.toFixed(1)+'%',color:'var(--accent-green)'},
+      {label:'BELOW 98% (RCA REQ)',val:fails,color:'var(--accent-red)'}
+    ].map(function(k){
+      return '<div class="stat-card" style="--stat-color:'+k.color+'"><div class="stat-label">'+k.label+'</div><div class="stat-value">'+k.val+'</div></div>';
+    }).join('');
+  }
+  
+  // Ranking table
+  var sorted=f.slice().sort(function(a,b){
+    var aConn=parseFloat2(a['Connection - D0+ 30Min']||a['Connection']);
+    var bConn=parseFloat2(b['Connection - D0+ 30Min']||b['Connection']);
+    return bConn-aConn;
+  });
+  
+  var body=document.getElementById('compBody');
+  if(body){
+    body.innerHTML=sorted.map(function(r,i){
+      var conn=parseFloat2(r['Connection - D0+ 30Min']||r['Connection']);
+      var bag=parseFloat2(r['D0+ 30Min-bagging']||r['Bagging']);
+      var matured=parseFloat2(r['Matured %']);
+      var fail=conn<98||bag<98;
+      var key=(r.facility_1||r.date||i);
+      var rca=rcaData[key]||'';
+      return '<tr class="'+(fail?'bad-row':'good-row')+'">'
+        +'<td><span class="medal '+(i===0?'m1':i===1?'m2':i===2?'m3':'mn')+'">'+(i+1)+'</span></td>'
+        +'<td><b>'+r.facility_1+'</b></td>'
+        +'<td>'+r.RH+'</td>'
+        +'<td><span class="badge badge-blue">'+(r.facility_Type||r['Facility Type']||'-')+'</span></td>'
+        +'<td>'+r.date+'</td>'
+        +'<td>'+r.Volume+'</td>'
+        +'<td><span style="color:'+(matured>=98?'var(--accent-green)':'var(--accent-red)')+'">'+matured+'%</span></td>'
+        +'<td><span style="color:'+(conn>=98?'var(--accent-green)':'var(--accent-red)')+'">'+conn+'%</span></td>'
+        +'<td><span style="color:'+(bag>=98?'var(--accent-green)':'var(--accent-red)')+'">'+bag+'%</span></td>'
+        +'<td><span class="badge '+(fail?'badge-red':'badge-green')+'">'+(fail?'⚠ FAIL':'✅ OK')+'</span></td>'
+        +'<td>'+(fail?'<button class="btn-save-kra" style="color:var(--accent-orange);" onclick="openRCA(this.dataset.key,this.dataset.fac)" data-key="'+key+'" data-fac="'+r.facility_1+'">✏ RCA</button>'+(rca?'<div style="font-size:10px;color:var(--text-muted);max-width:150px;white-space:normal;margin-top:4px">'+rca.substring(0,50)+'...</div>':''):'<span style="color:var(--text-muted);font-size:11px">N/A</span>')+'</td>'
+      +'</tr>';
+    }).join('')||'<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text-muted);">No data matches filter</td></tr>';
+  }
+  
+  // 7-day trend chart
+  var allFacs=[...new Set(f.map(function(r){return r.facility_1;}))].slice(0,6);
+  var allDates=[...new Set(f.map(function(r){return r.date;}))].sort().slice(-7);
+  var connDatasets=allFacs.map(function(fac,i){
+    return {label:fac,data:allDates.map(function(d){
+      var rec=f.find(function(r){return r.facility_1===fac&&r.date===d;});
+      return rec?parseFloat2(rec['Connection - D0+ 30Min']||rec['Connection']):null;
+    }),borderColor:['#00c8ff','#00ffd5','#ff6b35','#ffd700','#ff3366','#8b5cf6'][i],
+    backgroundColor:'transparent',tension:.3,spanGaps:true};
+  });
+  var bagDatasets=allFacs.map(function(fac,i){
+    return {label:fac,data:allDates.map(function(d){
+      var rec=f.find(function(r){return r.facility_1===fac&&r.date===d;});
+      return rec?parseFloat2(rec['D0+ 30Min-bagging']||rec['Bagging']):null;
+    }),borderColor:['#00c8ff','#00ffd5','#ff6b35','#ffd700','#ff3366','#8b5cf6'][i],
+    backgroundColor:'transparent',tension:.3,spanGaps:true};
+  });
+  
+  var opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#e8f4fd',font:{size:10}}}},
+    scales:{x:{ticks:{color:'#7ab3d4'},grid:{color:'rgba(0,200,255,0.05)'}},
+            y:{ticks:{color:'#7ab3d4',callback:function(v){return v+'%';}},grid:{color:'rgba(0,200,255,0.05)'},suggestedMin:90,suggestedMax:100}}};
+  
+  function mkCompChart(canvasId,datasets){
+    var canvas=document.getElementById(canvasId);
+    if(!canvas) return;
+    if(COMP_CHARTS[canvasId]) COMP_CHARTS[canvasId].destroy();
+    COMP_CHARTS[canvasId]=new Chart(canvas,{type:'line',data:{labels:allDates,datasets:datasets},options:opts});
+  }
+  mkCompChart('compChart1',connDatasets);
+  mkCompChart('compChart2',bagDatasets);
+}
+
+function openRCA(key,facName){
+  var rcaData=JSON.parse(localStorage.getItem('compRCA')||'{}');
+  var cur=rcaData[key]||'';
+  var txt=prompt('RCA for '+facName+' (explain why <98%):', cur);
+  if(txt===null) return;
+  rcaData[key]=txt;
+  localStorage.setItem('compRCA',JSON.stringify(rcaData));
+  renderCompliance();
+  showToast('RCA saved for '+facName,'✅');
+}
+
+function exportComplianceCSV(){
+  downloadCSV('compTable','compliance_report.csv');
+}
+
+// ── SORT CODE (updated to support GitHub loaded data) ──
+function renderSortCodes(){
+  filterSortCodes();
+  var zones=[...new Set(SORT_CODES.map(function(r){return r.zone;}))];
+  var zEl=document.getElementById('sortZone');
+  if(zEl) zEl.innerHTML='<option value="">All Zones</option>'+zones.map(function(z){return'<option>'+z+'</option>';}).join('');
+  var cnt=document.getElementById('sortCodeCount');
+  if(cnt) cnt.textContent='('+SORT_CODES.length+' locations)';
+}
+
+function filterSortCodes(){
+  var s=((document.getElementById('sortSearch')||{value:''}).value||'').toLowerCase();
+  var z=(document.getElementById('sortZone')||{value:''}).value;
+  var t=(document.getElementById('sortType')||{value:''}).value;
+  var f=SORT_CODES.filter(function(r){
+    var searchStr=(r.code+r.name+r.dcCode+r.status).toLowerCase();
+    return (!s||searchStr.includes(s))&&(!z||r.zone===z)&&(!t||r.type===t);
+  });
+  var cnt=document.getElementById('sortCodeCount');if(cnt) cnt.textContent='('+f.length+' locations)';
+  var body=document.getElementById('sortBody');
+  if(body) body.innerHTML=f.map(function(r,i){
+    return '<tr><td>'+(r.no||i+1)+'</td>'
+      +'<td><span class="badge badge-blue" style="font-family:monospace;">'+(r.dcCode||'-')+'</span></td>'
+      +'<td><span class="badge badge-green" style="font-family:monospace;">'+r.code+'</span></td>'
+      +'<td><b>'+r.name+'</b></td>'
+      +'<td>'+r.zone+'</td>'
+      +'<td><span class="badge '+(r.type==='Hub'?'badge-orange':r.type==='City Hub'?'badge-yellow':'badge-blue')+'">'+r.type+'</span></td>'
+      +'<td><span class="badge '+(String(r.status||'ACTIVE').toUpperCase()==='ACTIVE'?'badge-green':'badge-red')+'">'+String(r.status||'ACTIVE').toUpperCase()+'</span></td></tr>';
+  }).join('');
+}
+
+// ── KRA WEIGHTAGE EDITOR ──
+var kraCustomWeightage = JSON.parse(localStorage.getItem('kraCustomWeightage')||'null');
+
+function openKRAWeightageEditor(){
+  var modal=document.getElementById('kraWeightageModal');
+  if(!modal) return;
+  if(!kraCustomWeightage||!kraCustomWeightage.length){
+    kraCustomWeightage = KRA_DEFAULT.map(function(k){return {id:k.id,kr:k.kr,desc:k.desc,weightage:k.weightage};});
+  }
+  renderWeightageEditor();
+  modal.style.display='flex';
+}
+
+function renderWeightageEditor(){
+  var list=document.getElementById('kraWeightageList');
+  if(!list) return;
+  var total=0;
+  list.innerHTML=(kraCustomWeightage||[]).map(function(item,i){
+    total+=item.weightage||0;
+    return '<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;display:grid;grid-template-columns:40px 1fr 1fr 80px 40px;gap:8px;align-items:center;">'
+      +'<div style="font-family:monospace;color:var(--accent-yellow);font-weight:700;">'+(i+1)+'</div>'
+      +'<input type="text" value="'+item.kr+'" placeholder="KRA Name" onchange="kraCustomWeightage['+i+'].kr=this.value" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:5px;padding:7px;color:var(--text-primary);font-family:sans-serif;font-size:12px;outline:none;"/>'  
+      +'<input type="text" value="'+item.desc+'" placeholder="Description" onchange="kraCustomWeightage['+i+'].desc=this.value" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:5px;padding:7px;color:var(--text-secondary);font-family:sans-serif;font-size:12px;outline:none;"/>'
+      +'<div style="display:flex;align-items:center;gap:4px;"><input type="number" min="0" max="100" value="'+item.weightage+'" onchange="kraCustomWeightage['+i+'].weightage=parseFloat(this.value)||0;updateWeightTotal();" style="width:55px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:5px;padding:7px;color:var(--accent-yellow);font-family:monospace;font-size:13px;text-align:center;outline:none;"/><span style="font-size:11px;color:var(--text-muted)">%</span></div>'
+      +'<button onclick="removeKRAItem('+i+')" style="background:rgba(255,51,102,0.1);border:1px solid rgba(255,51,102,0.3);border-radius:4px;padding:6px;color:var(--accent-red);cursor:pointer;font-size:12px;">✕</button>'
+    +'</div>';
+  }).join('');
+  updateWeightTotal();
+}
+
+function updateWeightTotal(){
+  var total=(kraCustomWeightage||[]).reduce(function(a,item){return a+(item.weightage||0);},0);
+  var el=document.getElementById('kraWeightTotal');
+  if(el){el.textContent='Total: '+total+'%';el.style.color=Math.abs(total-100)<0.01?'var(--accent-green)':'var(--accent-red)';}
+}
+
+function addKRAItem(){
+  if(!kraCustomWeightage) kraCustomWeightage=[];
+  kraCustomWeightage.push({id:kraCustomWeightage.length+1,kr:'New KRA Item',desc:'',weightage:0});
+  renderWeightageEditor();
+}
+
+function removeKRAItem(i){
+  kraCustomWeightage.splice(i,1);
+  renderWeightageEditor();
+}
+
+function saveKRAWeightage(){
+  var total=(kraCustomWeightage||[]).reduce(function(a,item){return a+(item.weightage||0);},0);
+  if(Math.abs(total-100)>0.01){showToast('Total weightage must equal 100% (currently '+total+'%)','⚠️');return;}
+  localStorage.setItem('kraCustomWeightage',JSON.stringify(kraCustomWeightage));
+  // Apply to nexusKraData.sheet1 AND KRA_DEFAULT memory
+  nexusKraData.sheet1=kraCustomWeightage.map(function(item){return {'Sr. No.':item.id,'Key Responsibility (KR)':item.kr,'KR Discriptions':item.desc,Weightage:item.weightage};});
+  // Sync KRA_DEFAULT to match saved
+  kraCustomWeightage.forEach(function(item,i){if(KRA_DEFAULT[i]){KRA_DEFAULT[i].kr=item.kr;KRA_DEFAULT[i].desc=item.desc;KRA_DEFAULT[i].weightage=item.weightage;}});
+  renderKRAMyPerf();
+  document.getElementById('kraWeightageModal').style.display='none';
+  showToast('KRA Weightage saved! Total: '+total+'%','✅');
+}
+
+function exportKRAConfig(){
+  downloadCSV('kraMyTable','kra_config.csv');
+}
+
+// ── KRA MAPPING RENDER ──
+function renderMappingTables(){
+  var rhchBody=document.getElementById('mappingRHCHBody');
+  var chamBody=document.getElementById('mappingCHAMBody');
+  // Restore saved manual mapping
+  var savedMapping=localStorage.getItem('nexusKraMapping');
+  if(savedMapping){try{var sm=JSON.parse(savedMapping);if(sm&&sm.length&&!nexusKraData.sheet2.length)nexusKraData.sheet2=sm;}catch(e){}}
+  if(!nexusKraData.sheet2.length) return;
+  var rhMap={};
+  nexusKraData.sheet2.forEach(function(r){
+    var rh=r['Regional Head']||'';var ch=r['Cluster Head']||'';
+    if(!rhMap[rh]) rhMap[rh]=new Set();if(ch) rhMap[rh].add(ch);
+  });
+  if(rhchBody){
+    rhchBody.innerHTML=Object.entries(rhMap).map(function(e){
+      return [...e[1]].map(function(ch,i){
+        return '<tr><td>'+(i===0?'<b>'+e[0]+'</b>':'')+'</td><td>'+ch+'</td>'
+          +'<td>'+(nexusKraData.sheet2.find(function(r){return r['Cluster Head']===ch;})||{}).Zone+'</td>'
+          +'<td><span class="badge badge-green">Mapped</span></td></tr>';
+      }).join('');
+    }).join('')||'<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">Load KRA data from GitHub</td></tr>';
+  }
+  var chAMMap={};
+  nexusKraData.sheet2.forEach(function(r){
+    var ch=r['Cluster Head']||'';
+    if(!chAMMap[ch]) chAMMap[ch]=new Set();
+    ['Area Manager 1','Area Manager 2','Area Manager 3'].forEach(function(k){if(r[k]) chAMMap[ch].add(r[k]);});
+  });
+  if(chamBody){
+    chamBody.innerHTML=Object.entries(chAMMap).map(function(e){
+      return [...e[1]].map(function(am,i){
+        return '<tr><td>'+(i===0?'<b>'+e[0]+'</b>':'')+'</td><td>'+am+'</td>'
+          +'<td>'+(nexusKraData.sheet2.find(function(r){return r['Cluster Head']===e[0];})||{}).Zone+'</td>'
+          +'<td><span class="badge badge-green">Mapped</span></td></tr>';
+      }).join('');
+    }).join('')||'<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">Load KRA data</td></tr>';
+  }
 }
 
 // ── INIT ──
-runClock();
+// (clock already started above)
+// Load saved extra users
+(function(){
+  var extra=JSON.parse(localStorage.getItem('nexusExtraUsers')||'[]');
+  extra.forEach(function(u){if(!NEXUS_USERS.find(function(x){return x.mobile===u.mobile;})) NEXUS_USERS.push(u);});
+  // Load compliance data
+  if(COMPLIANCE_DATA.length) setTimeout(function(){populateCompFilters();},500);
+  // Load KRA custom weightage if saved, otherwise seed from KRA_DEFAULT
+  var kw=JSON.parse(localStorage.getItem('kraCustomWeightage')||'null');
+  if(kw&&kw.length){
+    kraCustomWeightage=kw;
+    nexusKraData.sheet1=kw.map(function(item){return {'Sr. No.':item.id,'Key Responsibility (KR)':item.kr,'KR Discriptions':item.desc,Weightage:item.weightage};});
+  } else {
+    // Use KRA_DEFAULT as initial sheet1 data
+    nexusKraData.sheet1=KRA_DEFAULT.map(function(k){return {'Sr. No.':k.id,'Key Responsibility (KR)':k.kr,'KR Discriptions':k.desc,Weightage:k.weightage};});
+  }
+})();
 document.addEventListener('DOMContentLoaded',function(){filterFleet();renderNexusCallouts();});
 
 // ═══════════════════════════════════════════════════════════════
@@ -3228,6 +5079,186 @@ document.addEventListener('DOMContentLoaded',function(){filterFleet();renderNexu
 // ═══════════════════════════════════════════════
 // GLOBALS & CONSTANTS
 // ═══════════════════════════════════════════════
+
+
+
+function nexusPostLogin(){
+  if(typeof nexusUpdateNotifBadge==='function') nexusUpdateNotifBadge();
+  if(typeof populateAssigneeDropdowns==='function') populateAssigneeDropdowns();
+  if(typeof nexusKraCascadeInit==='function') nexusKraCascadeInit();
+  if(typeof renderTaskInbox==='function') renderTaskInbox();
+  if(typeof renderMyTasks==='function') renderMyTasks();
+}
+// ════════════════════════════════════════════════════════
+// NOTIFICATION SYSTEM
+// ════════════════════════════════════════════════════════
+var nexusNotifications = JSON.parse(localStorage.getItem('nexusNotifs') || '[]');
+
+function nexusSaveNotifs(){
+  localStorage.setItem('nexusNotifs', JSON.stringify(nexusNotifications.slice(-200)));
+}
+
+function nexusAddNotification(data){
+  nexusNotifications.unshift({
+    id: Date.now(),
+    type: data.type || 'info',
+    taskId: data.taskId || null,
+    title: data.title || '',
+    assignees: data.assignees || [],
+    from: data.from || 'System',
+    time: data.time || new Date().toISOString(),
+    read: false
+  });
+  nexusSaveNotifs();
+  nexusUpdateNotifBadge();
+  nexusRenderNotifPanel();
+}
+
+function nexusUpdateNotifBadge(){
+  var myName = nexusCurrentUser ? nexusCurrentUser.name : '';
+  var role = nexusCurrentUser ? nexusCurrentUser.designation : '';
+  var isAdmin = ['superadmin','regional_head','cluster_head'].includes(role);
+  var unread = nexusNotifications.filter(function(n){
+    if(n.read) return false;
+    if(isAdmin) return true;
+    return n.assignees && n.assignees.includes(myName);
+  }).length;
+  // Update badge everywhere
+  ['notifBadge','nexusNotifBadge','notifCount'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.textContent=unread;el.style.display=unread>0?'inline-flex':'none';}
+  });
+}
+
+function nexusToggleNotif(){
+  var panel = document.getElementById('nexusNotifPanel');
+  var overlay = document.getElementById('nexusNotifOverlay');
+  if(!panel) return;
+  var open = panel.style.right==='0px';
+  panel.style.right = open ? '-360px' : '0px';
+  if(overlay) overlay.style.display = open ? 'none' : 'block';
+  if(!open){ nexusRenderNotifPanel(); nexusMarkAllRead(); }
+}
+
+function nexusCloseNotif(){
+  var panel=document.getElementById('nexusNotifPanel');
+  var overlay=document.getElementById('nexusNotifOverlay');
+  if(panel) panel.style.right='-360px';
+  if(overlay) overlay.style.display='none';
+}
+
+function nexusMarkAllRead(){
+  var myName=nexusCurrentUser?nexusCurrentUser.name:'';
+  var role=nexusCurrentUser?nexusCurrentUser.designation:'';
+  var isAdmin=['superadmin','regional_head','cluster_head'].includes(role);
+  nexusNotifications.forEach(function(n){
+    if(isAdmin||(n.assignees&&n.assignees.includes(myName))) n.read=true;
+  });
+  nexusSaveNotifs(); nexusUpdateNotifBadge();
+}
+
+function nexusClearNotifs(){
+  if(!confirm('Clear all notifications?')) return;
+  nexusNotifications=[]; nexusSaveNotifs();
+  nexusRenderNotifPanel(); nexusUpdateNotifBadge();
+}
+
+function nexusRenderNotifPanel(){
+  var el=document.getElementById('nexusNotifList'); if(!el) return;
+  var myName=nexusCurrentUser?nexusCurrentUser.name:'';
+  var role=nexusCurrentUser?nexusCurrentUser.designation:'';
+  var isAdmin=['superadmin','regional_head','cluster_head'].includes(role);
+  var visible=nexusNotifications.filter(function(n){
+    return isAdmin||(n.assignees&&n.assignees.includes(myName));
+  });
+  if(!visible.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 16px;color:#4a6680;font-size:.82rem">No notifications yet</div>';
+    return;
+  }
+  var typeIcon={task_assigned:'📋',kra_scored:'🎯',task_updated:'🔄',rca_updated:'📝',system:'🔔'};
+  el.innerHTML=visible.map(function(n){
+    var ico=typeIcon[n.type]||'🔔';
+    var timeStr=new Date(n.time).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    return '<div style="padding:12px 14px;border-bottom:1px solid rgba(0,200,255,.07);'+(n.read?'':'background:rgba(0,200,255,.04)')+'">'
+      +'<div style="display:flex;gap:8px;align-items:flex-start">'
+      +'<span style="font-size:1rem;flex-shrink:0;margin-top:1px">'+ico+'</span>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:.78rem;font-weight:700;color:'+(n.read?'#8aaac8':'#eef2ff')+'">'+n.title+'</div>'
+      +(n.assignees&&n.assignees.length?'<div style="font-size:.68rem;color:#00c8ff;margin-top:2px">→ '+n.assignees.join(', ')+'</div>':'')
+      +'<div style="font-size:.65rem;color:#4a6680;margin-top:3px">From: '+n.from+' &bull; '+timeStr+'</div>'
+      +'</div>'
+      +(n.read?'':'<div style="width:7px;height:7px;border-radius:50%;background:#00c8ff;flex-shrink:0;margin-top:5px"></div>')
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ════════════════════════════════════════
+// MULTISELECT COMPONENT
+// ════════════════════════════════════════
+var _MS={};
+function buildMS(id,opts,ph,cb){
+  var el=document.getElementById(id);if(!el)return;
+  el.innerHTML='';el.className='ms-wrap';_MS[id]={opts:opts.slice(),sel:[],ph:ph||'All',cb:cb||null};
+  var btn=document.createElement('div');btn.className='ms-btn';btn.id=id+'_btn';
+  var lbl=document.createElement('span');lbl.className='ms-lbl';lbl.textContent=ph||'All';btn.appendChild(lbl);
+  btn.addEventListener('click',function(e){e.stopPropagation();_msTog(id);});
+  var dd=document.createElement('div');dd.className='ms-dd';dd.id=id+'_dd';
+  var sr=document.createElement('div');sr.className='ms-srch';
+  var si=document.createElement('input');si.placeholder='Search...';
+  si.addEventListener('input',function(){_msRen(id,this.value);});
+  si.addEventListener('click',function(e){e.stopPropagation();});sr.appendChild(si);
+  var ac=document.createElement('div');ac.className='ms-acts';
+  var ba=document.createElement('button');ba.className='ms-act';ba.textContent='✓ All';
+  ba.addEventListener('click',function(e){e.stopPropagation();_MS[id].sel=_MS[id].opts.slice();var si2=document.querySelector('#'+id+'_dd .ms-srch input');_msRen(id,si2?si2.value:'');_msUpd(id);if(_MS[id].cb)_MS[id].cb();});
+  var bc=document.createElement('button');bc.className='ms-act';bc.textContent='✗ Clear';
+  bc.addEventListener('click',function(e){e.stopPropagation();_MS[id].sel=[];var si2=document.querySelector('#'+id+'_dd .ms-srch input');_msRen(id,si2?si2.value:'');_msUpd(id);if(_MS[id].cb)_MS[id].cb();});
+  ac.appendChild(ba);ac.appendChild(bc);
+  var li=document.createElement('div');li.className='ms-list';li.id=id+'_list';
+  dd.appendChild(sr);dd.appendChild(ac);dd.appendChild(li);el.appendChild(btn);el.appendChild(dd);_msRen(id,'');
+}
+function _msRen(id,q){
+  var m=_MS[id];if(!m)return;var li=document.getElementById(id+'_list');if(!li)return;
+  var f=m.opts.filter(function(o){return !q||String(o).toLowerCase().includes(q.toLowerCase());});
+  li.innerHTML='';
+  if(!f.length){li.innerHTML='<div style="padding:8px 10px;font-size:.71rem;color:#4a6680">No matches</div>';return;}
+  f.forEach(function(o){
+    var sel=m.sel.includes(o);
+    var row=document.createElement('div');row.className='ms-item'+(sel?' sel':'');
+    var cb2=document.createElement('input');cb2.type='checkbox';cb2.checked=sel;
+    cb2.addEventListener('click',function(e){e.stopPropagation();_msTI(id,o);});
+    var lb=document.createElement('label');lb.textContent=o;
+    row.appendChild(cb2);row.appendChild(lb);
+    row.addEventListener('click',function(){_msTI(id,o);});li.appendChild(row);
+  });
+}
+function _msTI(id,val){
+  var m=_MS[id];if(!m)return;var i=m.sel.indexOf(val);if(i>=0)m.sel.splice(i,1);else m.sel.push(val);
+  var si=document.querySelector('#'+id+'_dd .ms-srch input');_msRen(id,si?si.value:'');_msUpd(id);
+  if(m.cb)m.cb();
+}
+function _msUpd(id){
+  var m=_MS[id];if(!m)return;var btn=document.getElementById(id+'_btn');if(!btn)return;
+  var lbl=btn.querySelector('.ms-lbl');var cnt=btn.querySelector('.ms-cnt');if(cnt)cnt.remove();
+  if(!m.sel.length){if(lbl)lbl.textContent=m.ph;}
+  else if(m.sel.length===1){if(lbl)lbl.textContent=m.sel[0];}
+  else{if(lbl)lbl.textContent=m.sel[0];var c=document.createElement('span');c.className='ms-cnt';c.textContent='+'+( m.sel.length-1);btn.appendChild(c);}
+}
+function _msTog(id){
+  var dd=document.getElementById(id+'_dd');var btn=document.getElementById(id+'_btn');if(!dd)return;
+  var open=dd.classList.contains('open');
+  document.querySelectorAll('.ms-dd.open').forEach(function(d){d.classList.remove('open');var b=d.parentElement&&d.parentElement.querySelector('.ms-btn');if(b)b.classList.remove('open');});
+  if(!open){dd.classList.add('open');if(btn)btn.classList.add('open');var si=dd.querySelector('.ms-srch input');if(si){si.value='';si.focus();_msRen(id,'');}}
+}
+function getMS(id){return(_MS[id]&&_MS[id].sel)||[];}
+function resetMS(id){if(_MS[id]){_MS[id].sel=[];_msUpd(id);_msRen(id,'');}}
+function setMSOpts(id,opts){if(_MS[id]){_MS[id].opts=opts.slice();var si=document.querySelector('#'+id+'_dd .ms-srch input');_msRen(id,si?si.value:'');}}
+document.addEventListener('click',function(e){
+  if(!e.target.closest||!e.target.closest('.ms-wrap')){
+    document.querySelectorAll('.ms-dd.open').forEach(function(d){d.classList.remove('open');var b=d.parentElement&&d.parentElement.querySelector('.ms-btn');if(b)b.classList.remove('open');});
+  }
+});
+
 const IDB_NAME='lossiq_v4',IDB_STORE='kv',IDB_VER=1;
 const K_LOSS='loss',K_USERS='users',K_RCA='rca',K_ATTR='attr',K_LOCSTATUS='locstatus';
 let ALL_DATA=[],FILTERED_DATA=[],RCA_DATA={},ATTR_DATA={},ATTR_LOG=[],LOC_STATUS={},_charts={};
@@ -3253,14 +5284,14 @@ function openIDB(){if(_idb)return Promise.resolve(_idb);return new Promise((res,
 function idbPut(key,val){return openIDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(val,key);tx.oncomplete=()=>res(true);tx.onerror=()=>rej(tx.error);}));}
 function idbGet(key){return openIDB().then(db=>new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,'readonly');const r=tx.objectStore(IDB_STORE).get(key);r.onsuccess=()=>res(r.result??null);r.onerror=()=>rej(r.error);}));}
 
-function compress(rows){return rows.map(r=>[r.actual_lost_date,r.current_movement_type,r.awb,r.consolidation_awb,r.loss_percentage,r.shipment_value,r.loss_value,r.location,r.leg,r.reason,r.reason_l1,r.attribution_changed,r.credit_location,r['Cluster Head'],r.Zone,r['Regional Head'],r._month,r._rca||'']);}
-function expand(arr){return arr.map(r=>({actual_lost_date:S(r[0]),current_movement_type:S(r[1]),awb:S(r[2]),consolidation_awb:S(r[3]),loss_percentage:+r[4]||0,shipment_value:+r[5]||0,loss_value:+r[6]||0,location:S(r[7]),leg:S(r[8]),reason:S(r[9]),reason_l1:S(r[10]),attribution_changed:S(r[11]),credit_location:S(r[12]),'Cluster Head':S(r[13]),Zone:S(r[14]),'Regional Head':S(r[15]),_month:S(r[16])||'Unknown',_rca:S(r[17])}));}
+function compress(rows){return rows.map(r=>[r.actual_lost_date,r.current_movement_type,r.awb,r.consolidation_awb,r.loss_percentage,r.shipment_value,r.loss_value,r.location,r.leg,r.reason,r.reason_l1,r.attribution_changed,r.credit_location,r['Cluster Head'],r.Zone,r['Regional Head'],r._month,r._rca||'',r['Sortcentre type']||'',r.Patner||'']);}
+function expand(arr){return arr.map(r=>({actual_lost_date:S(r[0]),current_movement_type:S(r[1]),awb:S(r[2]),consolidation_awb:S(r[3]),loss_percentage:+r[4]||0,shipment_value:+r[5]||0,loss_value:+r[6]||0,location:S(r[7]),leg:S(r[8]),reason:S(r[9]),reason_l1:S(r[10]),attribution_changed:S(r[11]),credit_location:S(r[12]),'Cluster Head':S(r[13]),Zone:S(r[14]),'Regional Head':S(r[15]),_month:S(r[16])||'Unknown',_rca:S(r[17]),'Sortcentre type':S(r[18]),Patner:S(r[19])}));}
 
 async function saveLoss(){try{await idbPut(K_LOSS,compress(ALL_DATA));toast('✔ Saved','var(--green)');}catch(e){toast('Storage error','var(--red)');}}
 async function loadLoss(){try{const d=await idbGet(K_LOSS);if(d&&d.length){ALL_DATA=expand(d);FILTERED_DATA=[...ALL_DATA];}}catch(e){}}
-async function saveRCA(){try{await idbPut(K_RCA,RCA_DATA);}catch(e){}}
-async function loadRCA(){try{const d=await idbGet(K_RCA);if(d)RCA_DATA=d;}catch(e){}}
-async function saveAttr(){try{await idbPut(K_ATTR,{data:ATTR_DATA,log:ATTR_LOG});}catch(e){}}
+async function saveRCA(){try{await idbPut(K_RCA,RCA_DATA);}catch(e){}try{var exp=Date.now()+365*24*3600*1000;localStorage.setItem('nexus_rca_bak',JSON.stringify({data:RCA_DATA,exp:exp}));}catch(e){}}
+async function loadRCA(){try{const d=await idbGet(K_RCA);if(d&&Object.keys(d).length){RCA_DATA=d;return;}}catch(e){}try{var bak=JSON.parse(localStorage.getItem('nexus_rca_bak')||'{}');if(bak.data&&bak.exp>Date.now())RCA_DATA=bak.data;}catch(e){}}
+async function saveAttr(){try{await idbPut(K_ATTR,{data:ATTR_DATA,log:ATTR_LOG});}catch(e){}try{var exp=Date.now()+365*24*3600*1000;localStorage.setItem('nexus_attr_bak',JSON.stringify({data:ATTR_DATA,log:ATTR_LOG,exp:exp}));}catch(e){}}
 async function loadAttr(){try{const d=await idbGet(K_ATTR);if(d){ATTR_DATA=d.data||{};ATTR_LOG=d.log||[];}}catch(e){}}
 async function saveLocStatus(){try{await idbPut(K_LOCSTATUS,LOC_STATUS);}catch(e){}}
 async function loadLocStatus(){try{const d=await idbGet(K_LOCSTATUS);if(d)LOC_STATUS=d;}catch(e){}}
@@ -3302,18 +5333,17 @@ function toggleLoginType(){
 // doLogin defined in CLOUD SYNC section below
 // doLogin handled by nexus
 // doLogout handled by nexus
-function openPwdModal(){document.getElementById('pwdOld').value='';document.getElementById('pwdNew').value='';document.getElementById('pwdConfirm').value='';document.getElementById('pwdErr').style.display='none';document.getElementById('pwdModal').classList.add('show');}
-function closePwdModal(){document.getElementById('pwdModal').classList.remove('show');}
-function changePassword(){
-  const o=S(gv('pwdOld')),n=S(gv('pwdNew')),c=S(gv('pwdConfirm'));
-  const err=document.getElementById('pwdErr');err.style.display='none';
-  if(!o||!n||!c){err.textContent='All fields required.';err.style.display='block';return;}
-  if(o!==currentUser.password){err.textContent='Current password is wrong.';err.style.display='block';return;}
-  if(n.length<6){err.textContent='Min 6 characters.';err.style.display='block';return;}
-  if(n!==c){err.textContent='Passwords do not match.';err.style.display='block';return;}
-  const idx=USERS.findIndex(u=>u.mobile===currentUser.mobile);
-  if(idx>=0){USERS[idx].password=n;currentUser.password=n;}
-  saveUsers();closePwdModal();toast('✔ Password changed','var(--green)');
+function openPwdModal(){
+  var pwdOldEl=document.getElementById('pwdOld');
+  var pwdNewEl=document.getElementById('pwdNew');
+  var pwdCfEl=document.getElementById('pwdConfirm');
+  var pwdErr=document.getElementById('pwdErr');
+  if(pwdOldEl) pwdOldEl.value='';
+  if(pwdNewEl) pwdNewEl.value='';
+  if(pwdCfEl) pwdCfEl.value='';
+  if(pwdErr){pwdErr.style.display='none';pwdErr.textContent='';}
+  var modal=document.getElementById('pwdModal');
+  if(modal) modal.classList.add('show');
 }
 
 // ═══ USER CREATION ═══
@@ -3358,9 +5388,35 @@ function populateFilters(){
   const zones=uniq(ALL_DATA.map(r=>r.Zone));const rhs=uniq(ALL_DATA.map(r=>r['Regional Head']));
   const chs=uniq(ALL_DATA.map(r=>r['Cluster Head']));const locs=uniq(ALL_DATA.map(r=>r.location));
   const r1s=uniq(ALL_DATA.map(r=>r.reason_l1));
-  fillSel('fMonth',months,'All Months');fillSel('fZone',zones,'All Zones');fillSel('fRH',rhs,'All');fillSel('fCH',chs,'All');fillSel('fLoc',locs,'All');fillSel('fR1',r1s,'All Reasons');
-  fillSel('sMonth',months,'All Months');fillSel('sZone',zones,'All Zones');fillSel('sR1',r1s,'All');fillSel('sLoc',locs,'All');
-  fillSel('rMonth',months,'All Months');fillSel('rZone',zones,'All Zones');fillSel('rRH',rhs,'All');fillSel('rCH',chs,'All');
+  // Build multiselect for dashboard filters
+  if(document.getElementById('fMonth')&&typeof buildMS==='function'){
+    buildMS('fMonth',months,'All Months',applyFilters);
+    buildMS('fZone',zones,'All Zones',applyFilters);
+    buildMS('fRH',rhs,'All RHs',applyFilters);
+    buildMS('fCH',chs,'All CHs',applyFilters);
+    buildMS('fLoc',locs,'All Locations',applyFilters);
+    buildMS('fR1',r1s,'All Reasons',applyFilters);
+  } else {
+    fillSel('fMonth',months,'All Months');fillSel('fZone',zones,'All Zones');fillSel('fRH',rhs,'All');fillSel('fCH',chs,'All');fillSel('fLoc',locs,'All');fillSel('fR1',r1s,'All Reasons');
+  }
+  // Summary multiselect
+  if(document.getElementById('sMonth')&&typeof buildMS==='function'){
+    buildMS('sMonth',months,'All Months',null);
+    buildMS('sZone',zones,'All Zones',null);
+    buildMS('sR1',r1s,'All Reasons',null);
+    buildMS('sLoc',locs,'All Locations',null);
+  } else {
+    fillSel('sMonth',months,'All Months');fillSel('sZone',zones,'All Zones');fillSel('sR1',r1s,'All');fillSel('sLoc',locs,'All');
+  }
+  // Rankings multiselect
+  if(document.getElementById('rMonth')&&typeof buildMS==='function'){
+    buildMS('rMonth',months,'All Months',null);
+    buildMS('rZone',zones,'All Zones',null);
+    buildMS('rRH',rhs,'All RHs',null);
+    buildMS('rCH',chs,'All CHs',null);
+  } else {
+    fillSel('rMonth',months,'All Months');fillSel('rZone',zones,'All Zones');fillSel('rRH',rhs,'All');fillSel('rCH',chs,'All');
+  }
   fillSel('pMonth',months,'All Months');
   fillSel('perfCH',chs,'All Cluster Heads');
   fillSel('rcaFMonth',months,'All Months');fillSel('rcaFZone',zones,'All Zones');fillSel('rcaFRH',rhs,'All');fillSel('rcaFCH',chs,'All');
@@ -3397,13 +5453,19 @@ function scaleXY(inr=false,y1=false){
 // DASHBOARD
 // ═══════════════════════════════════════════════
 function applyFilters(){
+  // Helper: get array from multiselect or single select
+  function mf(id){
+    var ms=typeof getMS==='function'?getMS(id):[];
+    if(ms.length) return ms;
+    var v=gv(id); return v?[v]:[];
+  }
   FILTERED_DATA=ALL_DATA.filter(r=>{
-    if(gv('fMonth')&&r._month!==gv('fMonth'))return false;
-    if(gv('fZone')&&r.Zone!==gv('fZone'))return false;
-    if(gv('fRH')&&r['Regional Head']!==gv('fRH'))return false;
-    if(gv('fCH')&&r['Cluster Head']!==gv('fCH'))return false;
-    if(gv('fLoc')&&r.location!==gv('fLoc'))return false;
-    if(gv('fR1')&&r.reason_l1!==gv('fR1'))return false;
+    var months=mf('fMonth'); if(months.length&&!months.includes(r._month))return false;
+    var zones=mf('fZone'); if(zones.length&&!zones.includes(r.Zone))return false;
+    var rhs=mf('fRH'); if(rhs.length&&!rhs.includes(r['Regional Head']))return false;
+    var chs=mf('fCH'); if(chs.length&&!chs.includes(r['Cluster Head']))return false;
+    var locs=mf('fLoc'); if(locs.length&&!locs.includes(r.location))return false;
+    var r1s=mf('fR1'); if(r1s.length&&!r1s.includes(r.reason_l1))return false;
     if(gv('fMov')){const mv=gv('fMov').toLowerCase();if(mv==='forward'&&!isFwd(r))return false;if(mv==='rto'&&!isRTO(r))return false;}
     if(gv('fAttr')){const av=gv('fAttr');const rattr=(r.attribution_changed||'').toString().toLowerCase().trim();if(av==='yes'&&rattr!=='yes')return false;if(av==='no'&&rattr==='yes')return false;}
     return true;
@@ -3584,7 +5646,10 @@ function topLocCSV(){const d=FILTERED_DATA,locMap={};d.forEach(r=>{if(!locMap[r.
 // ═══════════════════════════════════════════════
 // SUMMARY TAB
 // ═══════════════════════════════════════════════
-function getSummData(){return ALL_DATA.filter(r=>{if(gv('sMonth')&&r._month!==gv('sMonth'))return false;if(gv('sZone')&&r.Zone!==gv('sZone'))return false;if(gv('sMov')){const mv=gv('sMov').toLowerCase();if(mv==='forward'&&!isFwd(r))return false;if(mv==='rto'&&!isRTO(r))return false;}if(gv('sR1')&&r.reason_l1!==gv('sR1'))return false;if(gv('sLoc')&&r.location!==gv('sLoc'))return false;return true;});}
+function getSummData(){return ALL_DATA.filter(r=>{
+    function mf(id){var ms=typeof getMS==='function'?getMS(id):[];return ms.length?ms:(gv(id)?[gv(id)]:[]);}
+    var sm=mf('sMonth');if(sm.length&&!sm.includes(r._month))return false;
+    var sz=mf('sZone');if(sz.length&&!sz.includes(r.Zone))return false;if(gv('sMov')){const mv=gv('sMov').toLowerCase();if(mv==='forward'&&!isFwd(r))return false;if(mv==='rto'&&!isRTO(r))return false;}if(gv('sR1')&&r.reason_l1!==gv('sR1'))return false;if(gv('sLoc')&&r.location!==gv('sLoc'))return false;return true;});}
 function resetSummary(){['sMonth','sZone','sMov','sR1','sLoc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderSummary();}
 
 function renderSummary(){
@@ -3702,7 +5767,7 @@ function clusterMonthCSV(){const d=getSummData(),months=sortMonths(uniq(d.map(r=
 // ═══════════════════════════════════════════════
 // RANKING TAB
 // ═══════════════════════════════════════════════
-function getRankData(){return ALL_DATA.filter(r=>{if(gv('rMonth')&&r._month!==gv('rMonth'))return false;if(gv('rZone')&&r.Zone!==gv('rZone'))return false;if(gv('rRH')&&r['Regional Head']!==gv('rRH'))return false;if(gv('rCH')&&r['Cluster Head']!==gv('rCH'))return false;return true;});}
+function getRankData(){return ALL_DATA.filter(r=>{var _rmf=function(id){var ms=typeof getMS==='function'?getMS(id):[];return ms.length?ms:(gv(id)?[gv(id)]:[]);}; var rm=_rmf('rMonth');if(rm.length&&!rm.includes(r._month))return false;var rz=_rmf('rZone');if(rz.length&&!rz.includes(r.Zone))return false;var rrh=_rmf('rRH');if(rrh.length&&!rrh.includes(r['Regional Head']))return false;var rch=_rmf('rCH');if(rch.length&&!rch.includes(r['Cluster Head']))return false;return true;});}
 function resetRanking(){['rMonth','rZone','rRH','rCH','rTop'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=id==='rTop'?'10':'';});renderRanking();}
 
 function buildStats(data,key){
@@ -3963,11 +6028,12 @@ function resetRCAFilters(){['rcaFMonth','rcaFZone','rcaFRH','rcaFCH'].forEach(id
 function resetPendingFilters(){['pendingSearch','pendingCH','pendingLoc','pendingR1'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderPendingRCA();}
 
 function getRCAData(){
+  function mf(id){var ms=typeof getMS==='function'?getMS(id):[];return ms.length?ms:(gv(id)?[gv(id)]:[]);}
   return ALL_DATA.filter(r=>{
-    if(gv('rcaFMonth')&&r._month!==gv('rcaFMonth'))return false;
-    if(gv('rcaFZone')&&r.Zone!==gv('rcaFZone'))return false;
-    if(gv('rcaFRH')&&r['Regional Head']!==gv('rcaFRH'))return false;
-    if(gv('rcaFCH')&&r['Cluster Head']!==gv('rcaFCH'))return false;
+    var rm=mf('rcaFMonth'); if(rm.length&&!rm.includes(r._month))return false;
+    var rz=mf('rcaFZone'); if(rz.length&&!rz.includes(r.Zone))return false;
+    var rr=mf('rcaFRH'); if(rr.length&&!rr.includes(r['Regional Head']))return false;
+    var rc=mf('rcaFCH'); if(rc.length&&!rc.includes(r['Cluster Head']))return false;
     return true;
   });
 }
@@ -4305,6 +6371,17 @@ function renderPerf(){
 // LOCATIONS MANAGEMENT (Point 15)
 // ═══════════════════════════════════════════════
 function renderLocMgmt(){
+  // If ALL_DATA not loaded, show placeholder
+  if(!ALL_DATA || !ALL_DATA.length){
+    var lb=document.getElementById('locMgmtBody');
+    if(lb) lb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--t2);">Upload loss data first to see locations</td></tr>';
+    var lc=document.getElementById('locMgmtCount');
+    if(lc) lc.textContent='0 locations';
+    return;
+  }
+  _renderLocMgmt_orig();
+}
+function _renderLocMgmt_orig(){
   const q=S(gv('locSearchFilter')).toLowerCase();
   const zf=gv('locZoneFilter'),sf=gv('locStatusFilter');
   const locMap={};
@@ -4600,7 +6677,7 @@ function liqInternalSwitchTab(name){
   else if(name==='rca'){renderRCASummaryKPI();renderRCAProgress();renderRCAHistory();renderPendingRCA();}
   else if(name==='reattribution')renderReattribution();
   else if(name==='performance')renderPerf();
-  else if(name==='locations')renderLocMgmt();
+  else if(name==='locations'){try{renderLocMgmt();}catch(e){console.warn(e);}}
   else if(name==='admin')renderAdmin();
   else if(name==='data'){updateDatasetInfo();initUploadPanel();}
 }
@@ -4929,6 +7006,8 @@ function processWorkbook(wb,file,source){
     'Cluster Head':S(r['Cluster Head']||r['cluster_head']||''),
     Zone:S(r.Zone||r.zone||''),
     'Regional Head':S(r['Regional Head']||r['regional_head']||''),
+    'Sortcentre type':S(r['Sortcentre type']||r['Sortcentre Type']||r['SC Type']||r['Sort Centre Type']||''),
+    Patner:S(r['Patner']||r['Partner']||r['patner']||''),
     _month:parseMonth(r.actual_lost_date||r['Actual Lost Date']||r['Date']||''),
     _rca:''
   }));
@@ -4946,5 +7025,20 @@ function processWorkbook(wb,file,source){
 }
 
 </script>
+
+<!-- ═══ NOTIFICATION PANEL ═══ -->
+<div id="nexusNotifPanel" style="position:fixed;top:0;right:-360px;width:340px;height:100vh;background:var(--bg-card,#0d1f35);border-left:1px solid rgba(0,200,255,.3);z-index:9000;transition:right .3s ease;display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.6);">
+  <div style="padding:16px 18px;border-bottom:1px solid rgba(0,200,255,.15);background:rgba(5,8,15,.97);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <div style="font-family:Rajdhani,sans-serif;font-weight:700;font-size:1rem;color:#00e5ff;letter-spacing:1px">🔔 NOTIFICATIONS</div>
+    <button onclick="nexusCloseNotif()" style="background:none;border:none;color:#4a6680;font-size:1.1rem;cursor:pointer;padding:2px 7px">✕</button>
+  </div>
+  <div style="padding:8px;border-bottom:1px solid rgba(0,200,255,.08);flex-shrink:0;display:flex;gap:6px">
+    <button onclick="nexusMarkAllRead()" style="flex:1;background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.2);border-radius:6px;padding:5px;color:#00c8ff;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.72rem;cursor:pointer">✓ ALL READ</button>
+    <button onclick="nexusClearNotifs()" style="flex:1;background:rgba(255,51,102,.08);border:1px solid rgba(255,51,102,.2);border-radius:6px;padding:5px;color:#ff3366;font-family:Rajdhani,sans-serif;font-weight:700;font-size:.72rem;cursor:pointer">🗑 CLEAR ALL</button>
+  </div>
+  <div id="nexusNotifList" style="flex:1;overflow-y:auto;padding:8px"></div>
+</div>
+<div id="nexusNotifOverlay" onclick="nexusCloseNotif()" style="display:none;position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,.2)"></div>
+
 </body>
-</html>
+</html>	
